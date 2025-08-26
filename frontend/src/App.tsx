@@ -7,7 +7,7 @@ function App() {
   const [backendData, setBackendData] = useState("正在请求后端...");
 
   useEffect(() => {
-    fetch("/api/hello")
+    fetch("/api/core/hello")
       .then((response) => {
         if (!response.ok) {
           throw new Error(`网络响应不正常 (${response.status})`);
