@@ -8,4 +8,4 @@ router: Router = Router()
 
 @router.get("/hello")
 def hello(request: Any) -> str:
-    return "Hello World!"
+    return "Hello AllBookCloud!"

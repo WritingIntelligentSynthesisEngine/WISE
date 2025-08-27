@@ -17,7 +17,7 @@ services:
       - default
     restart: unless-stopped
   Backend:
-    image: knightfemale/backend:latest
+    image: knightfemale/abc-backend:latest
     container_name: backend
     ports:
       - "30001:30001"
