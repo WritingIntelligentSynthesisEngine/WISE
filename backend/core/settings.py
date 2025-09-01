@@ -138,3 +138,8 @@ STATIC_URL: str = '/static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD: str = 'django.db.models.BigAutoField'
+
+# 设置 simpleui
+SIMPLEUI_HOME_INFO = False
+SIMPLEUI_DEFAULT_THEME = 'element.css'
+# SIMPLEUI_LOGO = ''
