@@ -21,6 +21,10 @@ services:
     container_name: backend
     ports:
       - "30001:30001"
+    volumes:
+      - type: bind
+        source: ./nginx/html/media
+        target: /workspace/media
     environment:
       BACKEND_IN_DOCKER: "True"
       BACKEND_DEBUG: "${BACKEND_DEBUG}"

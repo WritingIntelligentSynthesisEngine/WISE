@@ -1,2 +1,4 @@
+*.exe
+
 nginx/html/
 postgres/data/
