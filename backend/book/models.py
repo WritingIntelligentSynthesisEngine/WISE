@@ -51,26 +51,22 @@ class Book(Model):
     description: TextField = TextField(
         verbose_name='简介',
         default='无',
-        blank=True,
     )
     # 封面图片路径
     cover_image_path: CharField = CharField(
         verbose_name='封面图片路径',
         max_length=256,
         default='',
-        blank=True,
     )
     # 创建时间
     create_time: DateTimeField = DateTimeField(
         verbose_name='创建时间',
         default=timezone.now,
-        blank=True,
     )
     # 更新时间
     update_time: DateTimeField = DateTimeField(
         verbose_name='更新时间',
         auto_now=True,
-        blank=True,
     )
     # 书籍状态选择
     STATUS_CHOICES = (
@@ -84,14 +80,12 @@ class Book(Model):
         max_length=16,
         choices=STATUS_CHOICES,
         default='draft',
-        blank=True,
     )
     # 书籍属性
     attributes: JSONField = JSONField(
         verbose_name='书籍属性',
         help_text='存储书籍的属性, 如: {"is_top": false, "is_hot": true}',
         default=dict,
-        blank=True,
     )
     
     @property
@@ -150,7 +144,7 @@ class UserBookRelation(Model):
     )
     # 创作关系
     CREATIVE_ROLE_CHOICES: Tuple = (
-        (None, '读者'),
+        ('reader', '读者'),
         ('author', '主创'),
         ('co_author', '共创'),
         ('editor', '编辑'),
@@ -159,12 +153,11 @@ class UserBookRelation(Model):
         verbose_name='创作关系',
         max_length=16,
         choices=CREATIVE_ROLE_CHOICES,
-        default=None,
-        blank=True,
+        default='reader',
     )
     # 收藏状态
     COLLECTION_STATUS_CHOICES: Tuple = (
-        (None, '未收藏'),
+        ('not_collected', '未收藏'),
         ('collected', '已收藏'),
         ('want_to_read', '想要读'),
         ('reading', '正在读'),
@@ -174,15 +167,13 @@ class UserBookRelation(Model):
         verbose_name='收藏状态',
         max_length=16,
         choices=COLLECTION_STATUS_CHOICES,
-        default=None,
-        blank=True,
+        default='not_collected',
     )
     # 评分(-5 到 5 分)
     rating: IntegerField = IntegerField(
         verbose_name='评分',
         validators=[MinValueValidator(-5), MaxValueValidator(5)],
         default=0,
-        blank=True,
     )
     
     def __str__(self) -> str:
