@@ -5,11 +5,12 @@ from typing import Any, Dict
 from datetime import datetime
 
 from django.conf import settings
+from ninja_jwt.authentication import JWTAuth
 from django.shortcuts import get_object_or_404
 from ninja import Router, Schema, UploadedFile, File
 
 from utils import path_util
-from book.models import Book, Category
+from book.models import Book, Category, UserBookRelation
 
 router = Router(tags=["书籍与文章"])
 
@@ -37,14 +38,15 @@ class BookOut(Schema):
 @router.post(
     "/books/",
     response=BookOut,
-    summary="创建新书籍",
+    summary="创建书籍",
+    auth=JWTAuth(),
 )
 def create_book(
     request: Any,
     data: BookIn,
     cover_image: UploadedFile = File(None), # type: ignore
 ) -> Book:
-    """创建新书籍, 如果有封面则保存在媒体目录, 并且创建用户与书籍的作者关系"""
+    """创建书籍, 如果有封面则保存在媒体目录, 并且创建用户与书籍的作者关系"""
     # 获取分类
     category: Category = get_object_or_404(Category, id=data.category_id)
     # 处理封面图片
@@ -69,5 +71,11 @@ def create_book(
         cover_image_path=str(cover_image_path),
         status=data.status,
         attributes=data.attributes,
+    )
+    # 创建用户与书籍的作者关系
+    UserBookRelation.objects.create(
+        book=book,
+        user=request.user,
+        creative_role='author'
     )
     return book

@@ -49,8 +49,9 @@ INSTALLED_APPS: List[str] = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'ninja',
     'book.apps.BookConfig',
+    "ninja_extra",
+    'ninja',
 ]
 
 MIDDLEWARE: List[str] = [
