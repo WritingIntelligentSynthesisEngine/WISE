@@ -47,6 +47,7 @@ services:
         target: /var/lib/postgresql/data
     networks:
       - default
+    restart: unless-stopped
 
 networks:
   default:
