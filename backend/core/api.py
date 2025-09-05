@@ -5,6 +5,7 @@ from ninja_jwt.controller import NinjaJWTDefaultController
 from core.routers import router as core_router
 from book.routers import router as book_router
 
+
 api: NinjaExtraAPI = NinjaExtraAPI(title="AllBookCloud API")
 
 # JWT API

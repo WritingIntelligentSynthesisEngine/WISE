@@ -9,5 +9,5 @@ admin.site.register(Book)
 admin.site.register(UserBookRelation)
 
 admin.site.site_header = "AllBookCloud"
-admin.site.site_title = '书云 MIS'
-admin.site.index_title = '欢迎使用书云管理员后台系统'
+admin.site.site_title = "书云 MIS"
+admin.site.index_title = "欢迎使用书云管理员后台系统"

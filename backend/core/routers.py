@@ -3,6 +3,7 @@ from typing import Any
 
 from ninja import Router
 
+
 router: Router = Router(tags=["测试"])
 
 

@@ -7,17 +7,17 @@ from ninja import UploadedFile
 
 def generate_hash_path(file: UploadedFile, depth: int = 2) -> Path:
     """基于文件内容哈希生成多级目录路径
-    
+
     参数:
         file: 上传的文件
         prefix: 路径前缀
         depth: 目录层级深度
-    
+
     返回:
         Path: 相对路径
     """
     # 读取文件内容并计算哈希
-    file_content: bytes = b''.join([chunk for chunk in file.chunks()])
+    file_content: bytes = b"".join([chunk for chunk in file.chunks()])
     file_hash: str = hashlib.md5(file_content).hexdigest()
     # 构造多级哈希目录
     hash_based_path: Path = Path()

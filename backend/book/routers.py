@@ -17,6 +17,7 @@ from utils.authentication_util import OptionalAuth
 from book.models import Book, Category, UserBookRelation
 from book.permissions import can_delete_book, can_update_book, can_view_book
 
+
 router = Router(tags=["书籍与文章"])
 
 

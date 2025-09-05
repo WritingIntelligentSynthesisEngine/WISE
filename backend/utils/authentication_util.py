@@ -8,6 +8,7 @@ from django.contrib.auth.models import AnonymousUser
 
 class OptionalAuth(JWTAuth):
     """一个可选的认证类, 允许匿名访问但也能识别已认证用户"""
+
     def __call__(self, request: HttpRequest) -> Any:
         auth_result = super().__call__(request)
         if auth_result is None:
