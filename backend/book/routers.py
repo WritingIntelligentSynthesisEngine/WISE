@@ -178,6 +178,7 @@ def get_books(
 @router.get(
     "/books/{book_id}/",
     summary="获取书籍详情",
+    auth=OptionalAuth(),
     response={200: BookOut, 403: Dict[str, str], 404: Dict[str, str]},
 )
 def get_book(

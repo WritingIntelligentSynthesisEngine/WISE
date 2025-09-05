@@ -1,8 +1,8 @@
 # book/permissions.py
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 
-from core.permissions import is_admin
 from book.models import Book, UserBookRelation
+from core.permissions import is_admin, is_anonymous
 
 
 def is_author(user: AbstractUser | AnonymousUser, book: Book) -> bool:
@@ -43,5 +43,7 @@ def can_update_book(user: AbstractUser | AnonymousUser, book: Book) -> bool:
 
 
 def can_view_book(user: AbstractUser | AnonymousUser, book: Book) -> bool:
-    """未发布时, 非普通读者有查阅权限"""
+    """未发布时, 匿名用户和读者有查阅权限"""
+    if is_anonymous(user):
+        return False
     return is_admin(user) or is_author(user, book) or is_co_author(user, book) or is_editor(user, book)

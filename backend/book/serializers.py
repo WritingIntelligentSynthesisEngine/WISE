@@ -5,7 +5,7 @@ from django.db.models.manager import BaseManager
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 
 from book.models import Book
-from core.permissions import is_admin
+from core.permissions import is_admin, is_anonymous
 
 
 class BookFilter(FilterSet):
@@ -26,7 +26,7 @@ class BookFilter(FilterSet):
         if is_admin(user):
             return books
         # 匿名用户直接返回已发布的书籍
-        if user.is_anonymous:
+        if is_anonymous(user):
             return books.filter(Q(status__in=["serializing", "completed"]))
         # 认证用户返回已发布的书籍或自己管理的书籍
         return books.filter(Q(status__in=["serializing", "completed"]) | (Q(status="draft") & Q(user_relations__user=user) & ~Q(user_relations__creative_role="reader"))).distinct()
