@@ -43,6 +43,6 @@ def can_update_book(user: AbstractUser|AnonymousUser, book: Book) -> bool:
 
 
 def can_view_book(user: AbstractUser|AnonymousUser, book: Book) -> bool:
-    """未未发布时, 非普通读者有查阅权限"""
+    """未发布时, 非普通读者有查阅权限"""
     return is_admin(user) or is_author(user, book) or is_co_author(user, book) or is_editor(user, book)
 
