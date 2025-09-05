@@ -23,76 +23,76 @@ BASE_DIR: Path = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY: str = 'django-insecure-j37=g=p4$zrs7_78lzf&kiuf=urxptbv$xsjk7l4^1jl6f9zb!'
+SECRET_KEY: str = "django-insecure-j37=g=p4$zrs7_78lzf&kiuf=urxptbv$xsjk7l4^1jl6f9zb!"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG: bool = os.environ.get('BACKEND_DEBUG', 'True') == "True"
+DEBUG: bool = os.environ.get("BACKEND_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS: List[str] = ['*']
+ALLOWED_HOSTS: List[str] = ["*"]
 
 # 添加 CSRF 信任来源
 
-CSRF_TRUSTED_ORIGINS: List[str] = [f'{os.environ.get('FRONTEND_DOMAIN', 'http://localhost:30000')}']
+CSRF_TRUSTED_ORIGINS: List[str] = [f"{os.environ.get('FRONTEND_DOMAIN', 'http://localhost:30000')}"]
 
 # 添加 X-Forwarded 代理支持
 
-SECURE_PROXY_SSL_HEADER: Tuple = ('HTTP_X_FORWARDED_PROTO', 'http')
+SECURE_PROXY_SSL_HEADER: Tuple = ("HTTP_X_FORWARDED_PROTO", "http")
 USE_X_FORWARDED_HOST: bool = True
 
 # Application definition
 
 INSTALLED_APPS: List[str] = [
-    'simpleui',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'ninja',
+    "simpleui",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "ninja",
 ]
 
 MIDDLEWARE: List[str] = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF: str = 'core.urls'
+ROOT_URLCONF: str = "core.urls"
 
 TEMPLATES: List[Dict[str, Any]] = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION: str = 'core.wsgi.application'
+WSGI_APPLICATION: str = "core.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES: Dict[str, Dict[str, str]] = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'abc',
-        'USER': 'admin',
-        'PASSWORD': 'passwd',
-        'HOST': 'postgres' if os.environ.get('BACKEND_IN_DOCKER', "False") == "True" else 'localhost',
-        'PORT': '5432' if os.environ.get('BACKEND_IN_DOCKER', "False") == "True" else '30002',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "abc",
+        "USER": "admin",
+        "PASSWORD": "passwd",
+        "HOST": "postgres" if os.environ.get("BACKEND_IN_DOCKER", "False") == "True" else "localhost",
+        "PORT": "5432" if os.environ.get("BACKEND_IN_DOCKER", "False") == "True" else "30002",
     },
 }
 
@@ -102,16 +102,16 @@ DATABASES: Dict[str, Dict[str, str]] = {
 
 AUTH_PASSWORD_VALIDATORS: List[Dict[str, str]] = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -119,9 +119,9 @@ AUTH_PASSWORD_VALIDATORS: List[Dict[str, str]] = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE: str = 'zh-hans'
+LANGUAGE_CODE: str = "zh-hans"
 
-TIME_ZONE: str = 'Asia/Shanghai'
+TIME_ZONE: str = "Asia/Shanghai"
 
 USE_I18N: bool = True
 
@@ -131,14 +131,14 @@ USE_TZ: bool = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL: str = '/static/'
+STATIC_URL: str = "/static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD: str = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
 # 设置 simpleui
 SIMPLEUI_HOME_INFO = False
-SIMPLEUI_DEFAULT_THEME = 'element.css'
+SIMPLEUI_DEFAULT_THEME = "element.css"
 # SIMPLEUI_LOGO = ''

@@ -22,7 +22,8 @@ from django.urls import URLResolver, path
 
 from core.api import api
 
+
 urlpatterns: List[URLResolver] = [
-    path('admin/', admin.site.urls),
+    path("admin/", admin.site.urls),
     path("api/", api.urls),
 ]
