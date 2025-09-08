@@ -4,18 +4,19 @@ from pathlib import Path
 from datetime import datetime
 from typing import Any, Optional, List, Dict, Tuple, Literal
 
+from django.db.models import Q
 from django.conf import settings
 from ninja.errors import HttpError
 from django.http import HttpRequest
 from ninja_jwt.authentication import JWTAuth
 from django.db.models.manager import BaseManager
 from ninja import Router, Schema, UploadedFile, File
+from django.contrib.auth.models import AbstractUser, AnonymousUser
 
-from utils import path_util
-from book.serializers import BookFilter
-from utils.authentication_util import OptionalAuth
-from book.models import Book, Category, UserBookRelation
-from book.permissions import can_delete_book, can_update_book, can_view_book
+from utils import path_util, authentication_util
+from core.permissions import is_admin, is_active
+from book.permissions import can_delete, can_update, can_view
+from book.models import Book, Category, UserBookRelation, Chapter
 
 
 router = Router(tags=["书籍与文章"])
@@ -37,7 +38,7 @@ class BookUpdateIn(Schema):
 
 class BookOut(Schema):
     id: int
-    category_id: int
+    category_id: Optional[int] = None
     title: str
     description: str
     cover_image_path: str
@@ -45,6 +46,30 @@ class BookOut(Schema):
     update_time: datetime
     status: str
     attributes: Dict[str, Any]
+
+
+class ChapterCreateIn(Schema):
+    chapter_number: int
+    title: str
+    content: List[Dict[str, Any]] = []
+
+
+class ChapterUpdateIn(Schema):
+    chapter_number: Optional[int] = None
+    title: Optional[str] = None
+    content: Optional[List[Dict[str, Any]]] = None
+    status: Optional[str] = None
+
+
+class ChapterOut(Schema):
+    id: int
+    book_id: int
+    chapter_number: int
+    title: str
+    content: List[Dict[str, Any]]
+    create_time: datetime
+    update_time: datetime
+    status: str
 
 
 @router.post(
@@ -99,7 +124,7 @@ def delete_book(
     except Book.DoesNotExist:
         raise HttpError(404, "书籍不存在")
     # 检查权限
-    if not can_delete_book(request.user, book):
+    if not can_delete(request.user, book):
         raise HttpError(403, "没有删除权限")
     # 只删除数据库记录, 这会级联删除所有相关的关系记录, 但不删除封面文件
     book.delete()
@@ -125,7 +150,7 @@ def update_book(
     except Book.DoesNotExist:
         raise HttpError(404, "书籍不存在")
     # 检查权限
-    if not can_update_book(request.user, book):
+    if not can_update(request.user, book):
         raise HttpError(403, "没有更新权限")
     # 只更新提供的字段
     if data.title is not None:
@@ -150,7 +175,7 @@ def update_book(
 @router.get(
     "/books/",
     summary="获取书籍列表",
-    auth=OptionalAuth(),
+    auth=authentication_util.OptionalAuth(),
     response={200: List[BookOut], 400: Dict[str, str]},
 )
 def get_books(
@@ -159,41 +184,218 @@ def get_books(
     page_size: int = 20,
     category_id: Optional[int] = None,
     status: Optional[str] = None,
-) -> BaseManager[Book]:
+) -> Tuple[Literal[200], BaseManager[Book]]:
     """获取书籍列表, 支持过滤和分页"""
     # 获取所有书籍
     queryset: BaseManager[Book] = Book.objects.all()
+    # 获取用户
+    user: AbstractUser | AnonymousUser = request.user
     # 过滤
-    queryset = BookFilter.view_permission_filter(Book.objects.all(), request.user)
+    if not is_active(user):  # 未激活用户直接返回已发布的书籍
+        print("用户为未激活用户")
+        queryset = queryset.filter(Q(status__in=["serializing", "completed"]))
+    elif is_admin(user):  # 管理员直接返回全部书籍
+        print("用户为管理员")
+        pass
+    else:  # 认证用户返回已发布的书籍或自己管理的书籍
+        print("用户为普通用户")
+        queryset = queryset.filter(Q(status__in=["serializing", "completed"]) | (Q(status="draft") & Q(user_relations__user=user) & ~Q(user_relations__creative_role="reader"))).distinct()
     if category_id:
         queryset = queryset.filter(category_id=category_id)
     if status:
         queryset = queryset.filter(status=status)
     # 分页
-    start = (page - 1) * page_size
-    end = start + page_size
-    return queryset[start:end]
+    start: int = (page - 1) * page_size
+    end: int = start + page_size
+    return 200, queryset[start:end]
 
 
 @router.get(
     "/books/{book_id}/",
     summary="获取书籍详情",
-    auth=OptionalAuth(),
+    auth=authentication_util.OptionalAuth(),
     response={200: BookOut, 403: Dict[str, str], 404: Dict[str, str]},
 )
 def get_book(
     request: HttpRequest,
     book_id: int,
-) -> Book:
+) -> Tuple[Literal[200], Book]:
     """获取特定书籍的详细信息"""
     try:
         book = Book.objects.get(id=book_id)
     except Book.DoesNotExist:
         raise HttpError(404, "书籍不存在")
         # 检查用户是否有权限查看书籍
-    if book.status == "draft" and not can_view_book(request.user, book):
+    if book.status == "draft" and not can_view(request.user, book):
         raise HttpError(403, "没有查看权限")
-    return book
+    return 200, book
+
+
+@router.post(
+    "/books/{book_id}/chapters/",
+    summary="创建章节",
+    auth=JWTAuth(),
+    response={201: ChapterOut, 400: Dict[str, str], 403: Dict[str, str], 404: Dict[str, str]},
+)
+def create_chapter(
+    request: HttpRequest,
+    book_id: int,
+    data: ChapterCreateIn,
+) -> Tuple[Literal[201], Chapter]:
+    """创建新章节"""
+    # 获取书籍
+    try:
+        book: Book = Book.objects.get(id=book_id)
+    except Book.DoesNotExist:
+        raise HttpError(404, "书籍不存在")
+    # 检查权限
+    if not can_update(request.user, book):
+        raise HttpError(403, "没有创建章节权限")
+    # 检查章数是否已存在
+    if Chapter.objects.filter(book=book, chapter_number=data.chapter_number).exists():
+        raise HttpError(400, "该章数已存在")
+    # 创建章节
+    chapter: Chapter = Chapter.objects.create(
+        book=book,
+        chapter_number=data.chapter_number,
+        title=data.title,
+        content=data.content,
+    )
+    return 201, chapter
+
+
+@router.patch(
+    "/books/{book_id}/chapters/{chapter_number}/",
+    summary="更新章节",
+    auth=JWTAuth(),
+    response={200: ChapterOut, 400: Dict[str, str], 403: Dict[str, str], 404: Dict[str, str]},
+)
+def update_chapter(
+    request: HttpRequest,
+    book_id: int,
+    chapter_number: int,
+    data: ChapterUpdateIn,
+) -> Tuple[Literal[200], Chapter]:
+    """更新章节信息"""
+    # 获取书籍
+    try:
+        book: Book = Book.objects.get(id=book_id)
+    except Book.DoesNotExist:
+        raise HttpError(404, "书籍不存在")
+    # 获取章节
+    try:
+        chapter: Chapter = Chapter.objects.get(book_id=book_id, chapter_number=chapter_number)
+    except Chapter.DoesNotExist:
+        raise HttpError(404, "章节不存在")
+    # 检查权限
+    if not can_update(request.user, book):
+        raise HttpError(403, "没有更新章节权限")
+    # 更新字段
+    if data.chapter_number is not None:
+        # 检查新章数是否已存在(排除自身)
+        if Chapter.objects.filter(book_id=book_id, chapter_number=data.chapter_number).exclude(id=chapter.id).exists():
+            raise HttpError(400, "该章数已存在")
+        chapter.chapter_number = data.chapter_number
+    if data.title is not None:
+        chapter.title = data.title
+    if data.content is not None:
+        chapter.content = data.content
+    if data.status is not None:
+        chapter.status = data.status
+    chapter.save()
+    return 200, chapter
+
+
+@router.delete(
+    "/books/{book_id}/chapters/{chapter_number}/",
+    summary="删除章节",
+    auth=JWTAuth(),
+    response={204: None, 403: Dict[str, str], 404: Dict[str, str]},
+)
+def delete_chapter(
+    request: HttpRequest,
+    book_id: int,
+    chapter_number: int,
+) -> Tuple[Literal[204], None]:
+    """删除章节"""
+    # 获取书籍
+    try:
+        book: Book = Book.objects.get(id=book_id)
+    except Book.DoesNotExist:
+        raise HttpError(404, "书籍不存在")
+    # 获取章节
+    try:
+        chapter: Chapter = Chapter.objects.get(book_id=book_id, chapter_number=chapter_number)
+    except Chapter.DoesNotExist:
+        raise HttpError(404, "章节不存在")
+    # 检查权限
+    if not can_delete(request.user, book):
+        raise HttpError(403, "没有删除章节权限")
+    # 删除章节
+    chapter.delete()
+    return 204, None
+
+
+@router.get(
+    "/books/{book_id}/chapters/",
+    summary="获取章节列表",
+    auth=authentication_util.OptionalAuth(),
+    response={200: List[ChapterOut], 403: Dict[str, str], 404: Dict[str, str]},
+)
+def get_chapters(
+    request: HttpRequest,
+    book_id: int,
+    page: int = 1,
+    page_size: int = 20,
+) -> Tuple[Literal[200], BaseManager[Chapter]]:
+    """获取书籍的章节列表"""
+    # 获取书籍
+    try:
+        book: Book = Book.objects.get(id=book_id)
+    except Book.DoesNotExist:
+        raise HttpError(404, "书籍不存在")
+    # 获取用户
+    user: AbstractUser | AnonymousUser = request.user
+    # 检查书籍权限
+    if book.status == "draft" and not can_view(user, book):
+        raise HttpError(403, "没有查看权限")
+    # 获取所有章节
+    queryset: BaseManager[Chapter] = Chapter.objects.filter(book=book)
+    # 如果没有查阅权限, 只返回已发布的章节
+    if not can_view(user, book):
+        queryset = queryset.filter(status="published")
+    # 分页
+    start = (page - 1) * page_size
+    end = start + page_size
+    return 200, queryset.order_by("chapter_number")[start:end]
+
+
+@router.get(
+    "/books/{book_id}/chapters/{chapter_number}/",
+    summary="获取章节详情",
+    auth=authentication_util.OptionalAuth(),
+    response={200: ChapterOut, 403: Dict[str, str], 404: Dict[str, str]},
+)
+def get_chapter(
+    request: HttpRequest,
+    book_id: int,
+    chapter_number: int,
+) -> Tuple[Literal[200], Chapter]:
+    """获取特定章节的详细信息"""
+    # 获取书籍
+    try:
+        book: Book = Book.objects.get(id=book_id)
+    except Book.DoesNotExist:
+        raise HttpError(404, "书籍不存在")
+    # 获取章节
+    try:
+        chapter: Chapter = Chapter.objects.get(book_id=book_id, chapter_number=chapter_number)
+    except Chapter.DoesNotExist:
+        raise HttpError(404, "章节不存在")
+    # 检查权限
+    if not can_view(request.user, book):
+        raise HttpError(403, "没有查看权限")
+    return 200, chapter
 
 
 def save_cover_image(cover_image: Optional[UploadedFile]) -> str:

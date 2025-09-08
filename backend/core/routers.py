@@ -63,7 +63,12 @@ class TokenObtainPairController:
         return refresh_token.to_response_schema()
 
 
-@api_controller("/token", permissions=[AllowAny], tags=["令牌"], auth=None)
+@api_controller(
+    "/token",
+    permissions=[AllowAny],
+    tags=["令牌"],
+    auth=None,
+)
 class NinjaJWTDefaultController(ControllerBase, TokenVerificationController, TokenObtainPairController):
     """NinjaJWT 获取和刷新令牌的默认控制器"""
 

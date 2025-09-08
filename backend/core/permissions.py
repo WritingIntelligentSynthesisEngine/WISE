@@ -7,6 +7,11 @@ def is_admin(user: AbstractUser | AnonymousUser) -> bool:
     return user.is_staff or user.is_superuser
 
 
+def is_active(user: AbstractUser | AnonymousUser) -> bool:
+    """是否为激活用户"""
+    return user.is_active
+
+
 def is_anonymous(user: AbstractUser | AnonymousUser) -> bool:
     """是否为匿名用户"""
     return user.is_anonymous
