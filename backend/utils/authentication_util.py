@@ -1,4 +1,4 @@
-# core/authentication.py
+# utils/authentication.py
 from typing import Any
 
 from django.http import HttpRequest
