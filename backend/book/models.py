@@ -43,6 +43,8 @@ class Book(Model):
         Category,
         verbose_name="分类名",
         on_delete=CASCADE,
+        null=True,
+        blank=True,
     )
     # 书籍标题
     title: CharField = CharField(
@@ -59,6 +61,7 @@ class Book(Model):
         verbose_name="封面图片路径",
         max_length=256,
         default="",
+        blank=True,
     )
     # 创建时间
     create_time: DateTimeField = DateTimeField(
@@ -87,7 +90,8 @@ class Book(Model):
     attributes: JSONField = JSONField(
         verbose_name="书籍属性",
         help_text='存储书籍的属性, 如: {"is_top": false, "is_hot": true}',
-        default=dict,
+        default=dict(),
+        blank=True,
     )
 
     @property
@@ -113,7 +117,7 @@ class Book(Model):
         return self.user_relations.exclude(rating__isnull=True).count()  # type: ignore
 
     def __str__(self) -> str:
-        return self.title
+        return f"《{self.title}》"
 
     class Meta:
         verbose_name: str = "书籍"
@@ -183,3 +187,69 @@ class UserBookRelation(Model):
         verbose_name_plural: str = "书籍-用户关系"
         # 同一用户对同一书籍只能有一条关系记录
         unique_together: Tuple = ("book", "user")
+
+
+class Chapter(Model):
+    """章节模型, 存储书籍的章节内容"""
+
+    # 自增主键
+    id = AutoField(
+        primary_key=True,
+    )
+    # 所属书籍
+    book: ForeignKey = ForeignKey(
+        Book,
+        verbose_name="所属书籍",
+        on_delete=CASCADE,
+        related_name="chapters",
+    )
+    # 章数
+    chapter_number: IntegerField = IntegerField(
+        verbose_name="章数",
+        validators=[MinValueValidator(1)],
+    )
+    # 章节标题
+    title: CharField = CharField(
+        verbose_name="章节标题",
+        max_length=128,
+        default="",
+    )
+    # 内容(JSON格式)
+    content: JSONField = JSONField(
+        verbose_name="内容",
+        help_text='存储章节内容, 如: [{"index": 1, "type": "text", "content": "文本内容", "style": {"color": "red", "font": "SimHei"}}]',
+        default=list(),
+        blank=True,
+    )
+    # 创建时间
+    create_time: DateTimeField = DateTimeField(
+        verbose_name="创建时间",
+        default=timezone.now,
+    )
+    # 更新时间
+    update_time: DateTimeField = DateTimeField(
+        verbose_name="更新时间",
+        auto_now=True,
+    )
+    # 章节状态
+    STATUS_CHOICES: Tuple = (
+        ("draft", "草稿"),
+        ("published", "已发布"),
+    )
+    status: CharField = CharField(
+        verbose_name="章节状态",
+        max_length=16,
+        choices=STATUS_CHOICES,
+        default="draft",
+    )
+
+    def __str__(self) -> str:
+        return f"《{self.book.title}》 - 第{self.chapter_number}章: {self.title}"
+
+    class Meta:
+        verbose_name: str = "章节"
+        verbose_name_plural: str = "章节"
+        # 先按章数升序, 再按创建时间升序
+        ordering: List[str] = ["chapter_number", "create_time"]
+        # 确保同一书籍中章数唯一
+        unique_together: Tuple = ("book", "chapter_number")
