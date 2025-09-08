@@ -1,7 +1,6 @@
 # core/routers.py
-from typing import Any
-
 from ninja import Router
+from django.http import HttpRequest
 
 
 router: Router = Router(tags=["核心"])
@@ -11,6 +10,6 @@ router: Router = Router(tags=["核心"])
     "/hello",
     summary="连通测试",
 )
-def hello(request: Any) -> str:
+def hello(request: HttpRequest) -> str:
     """用于连通测试, 返回一个字符串"""
     return "Hello World!"
