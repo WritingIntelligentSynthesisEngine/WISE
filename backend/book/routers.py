@@ -1,75 +1,25 @@
 # book/routers.py
 import os
 from pathlib import Path
-from datetime import datetime
-from typing import Any, Optional, List, Dict, Tuple, Literal
+from typing import Optional, List, Dict, Tuple, Literal
 
 from django.db.models import Q
 from django.conf import settings
 from ninja.errors import HttpError
 from django.http import HttpRequest
+from ninja import Router, UploadedFile, File
 from ninja_jwt.authentication import JWTAuth
 from django.db.models.manager import BaseManager
-from ninja import Router, Schema, UploadedFile, File
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 
 from utils import path_util, authentication_util
 from core.permissions import is_admin, is_active
 from book.permissions import can_delete, can_update, can_view
 from book.models import Book, Category, UserBookRelation, Chapter
+from book.schemas import BookCreateIn, BookUpdateIn, BookOut, ChapterCreateIn, ChapterUpdateIn, ChapterOut
 
 
 router = Router(tags=["书籍与文章"])
-
-
-class BookCreateIn(Schema):
-    category_id: int = 1
-    title: str
-    description: str = "无"
-    attributes: Dict[str, Any] = {}
-
-
-class BookUpdateIn(Schema):
-    category_id: Optional[int] = None
-    title: Optional[str] = None
-    description: Optional[str] = None
-    attributes: Optional[Dict[str, Any]] = None
-
-
-class BookOut(Schema):
-    id: int
-    category_id: Optional[int] = None
-    title: str
-    description: str
-    cover_image_path: str
-    create_time: datetime
-    update_time: datetime
-    status: str
-    attributes: Dict[str, Any]
-
-
-class ChapterCreateIn(Schema):
-    chapter_number: int
-    title: str
-    content: List[Dict[str, Any]] = []
-
-
-class ChapterUpdateIn(Schema):
-    chapter_number: Optional[int] = None
-    title: Optional[str] = None
-    content: Optional[List[Dict[str, Any]]] = None
-    status: Optional[str] = None
-
-
-class ChapterOut(Schema):
-    id: int
-    book_id: int
-    chapter_number: int
-    title: str
-    content: List[Dict[str, Any]]
-    create_time: datetime
-    update_time: datetime
-    status: str
 
 
 @router.post(
@@ -133,7 +83,7 @@ def delete_book(
 
 @router.patch(
     "/books/{book_id}/",
-    summary="更新书籍信息",
+    summary="更新书籍",
     auth=JWTAuth(),
     response={200: BookOut, 403: Dict[str, str], 404: Dict[str, str]},
 )
@@ -143,7 +93,7 @@ def update_book(
     data: BookUpdateIn,
     cover_image: Optional[UploadedFile] = File(None),  # type: ignore
 ) -> Tuple[Literal[200], Book]:
-    """更新书籍信息"""
+    """更新书籍"""
     # 获取要更新的书籍
     try:
         book: Book = Book.objects.get(id=book_id)
@@ -212,7 +162,7 @@ def get_books(
 
 @router.get(
     "/books/{book_id}/",
-    summary="获取书籍详情",
+    summary="获取书籍",
     auth=authentication_util.OptionalAuth(),
     response={200: BookOut, 403: Dict[str, str], 404: Dict[str, str]},
 )
@@ -220,7 +170,7 @@ def get_book(
     request: HttpRequest,
     book_id: int,
 ) -> Tuple[Literal[200], Book]:
-    """获取特定书籍的详细信息"""
+    """获取特定书籍"""
     try:
         book = Book.objects.get(id=book_id)
     except Book.DoesNotExist:
@@ -372,7 +322,7 @@ def get_chapters(
 
 @router.get(
     "/books/{book_id}/chapters/{chapter_number}/",
-    summary="获取章节详情",
+    summary="获取章节",
     auth=authentication_util.OptionalAuth(),
     response={200: ChapterOut, 403: Dict[str, str], 404: Dict[str, str]},
 )
@@ -381,7 +331,7 @@ def get_chapter(
     book_id: int,
     chapter_number: int,
 ) -> Tuple[Literal[200], Chapter]:
-    """获取特定章节的详细信息"""
+    """获取特定章节"""
     # 获取书籍
     try:
         book: Book = Book.objects.get(id=book_id)
