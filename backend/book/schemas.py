@@ -8,7 +8,7 @@ from ninja import Schema
 class BookCreateIn(Schema):
     """创建书籍时的输入"""
 
-    category_id: int = 1
+    category_id: Optional[int] = None
     title: str
     description: str = "无"
     attributes: Dict[str, Any] = {}

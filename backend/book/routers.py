@@ -36,9 +36,9 @@ def create_book(
     """创建书籍, 如果有封面则保存在媒体目录, 并且创建用户与书籍的作者关系"""
     # 获取分类
     try:
-        category: Category = Category.objects.get(id=data.category_id)
+        category: Category | None = Category.objects.get(id=data.category_id)
     except Category.DoesNotExist:
-        raise HttpError(404, "分类不存在")
+        category = None
     # 创建书籍
     book: Book = Book.objects.create(
         category=category,
@@ -126,7 +126,7 @@ def update_book(
     "/books/",
     summary="获取书籍列表",
     auth=authentication_util.OptionalAuth(),
-    response={200: List[BookOut], 400: Dict[str, str]},
+    response={200: List[BookOut]},
 )
 def get_books(
     request: HttpRequest,
@@ -142,13 +142,10 @@ def get_books(
     user: AbstractUser | AnonymousUser = request.user
     # 过滤
     if not is_active(user):  # 未激活用户直接返回已发布的书籍
-        print("用户为未激活用户")
         queryset = queryset.filter(Q(status__in=["serializing", "completed"]))
     elif is_admin(user):  # 管理员直接返回全部书籍
-        print("用户为管理员")
         pass
     else:  # 认证用户返回已发布的书籍或自己管理的书籍
-        print("用户为普通用户")
         queryset = queryset.filter(Q(status__in=["serializing", "completed"]) | (Q(status="draft") & Q(user_relations__user=user) & ~Q(user_relations__creative_role="reader"))).distinct()
     if category_id:
         queryset = queryset.filter(category_id=category_id)
@@ -315,8 +312,8 @@ def get_chapters(
     if not can_view(user, book):
         queryset = queryset.filter(status="published")
     # 分页
-    start = (page - 1) * page_size
-    end = start + page_size
+    start: int = (page - 1) * page_size
+    end: int = start + page_size
     return 200, queryset.order_by("chapter_number")[start:end]
 
 

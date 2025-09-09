@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='book',
             name='attributes',
-            field=models.JSONField(blank=True, default={}, help_text='存储书籍的属性, 如: {"is_top": false, "is_hot": true}', verbose_name='书籍属性'),
+            field=models.JSONField(blank=True, default=dict, help_text='存储书籍的属性, 如: {"is_top": false, "is_hot": true}', verbose_name='书籍属性'),
         ),
         migrations.AlterField(
             model_name='book',
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('chapter_number', models.IntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='章数')),
                 ('title', models.CharField(default='', max_length=128, verbose_name='章节标题')),
-                ('content', models.JSONField(blank=True, default=[], help_text='存储章节内容, 如: [{"index": 1, "type": "text", "content": "文本内容", "style": {"color": "red", "font": "SimHei"}}]', verbose_name='内容')),
+                ('content', models.JSONField(blank=True, default=list, help_text='存储章节内容, 如: [{"index": 1, "type": "text", "content": "文本内容", "style": {"color": "red", "font": "SimHei"}}]', verbose_name='内容')),
                 ('create_time', models.DateTimeField(default=django.utils.timezone.now, verbose_name='创建时间')),
                 ('update_time', models.DateTimeField(auto_now=True, verbose_name='更新时间')),
                 ('status', models.CharField(choices=[('draft', '草稿'), ('published', '已发布')], default='draft', max_length=16, verbose_name='章节状态')),

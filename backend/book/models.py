@@ -90,7 +90,7 @@ class Book(Model):
     attributes: JSONField = JSONField(
         verbose_name="书籍属性",
         help_text='存储书籍的属性, 如: {"is_top": false, "is_hot": true}',
-        default=dict(),
+        default=dict,
         blank=True,
     )
 
@@ -218,7 +218,7 @@ class Chapter(Model):
     content: JSONField = JSONField(
         verbose_name="内容",
         help_text='存储章节内容, 如: [{"index": 1, "type": "text", "content": "文本内容", "style": {"color": "red", "font": "SimHei"}}]',
-        default=list(),
+        default=list,
         blank=True,
     )
     # 创建时间
