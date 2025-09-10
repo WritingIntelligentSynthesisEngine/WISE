@@ -4,6 +4,7 @@ version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
     "uvicorn",
+    "pydantic[email]",
     "django-simpleui",
     "django-ninja-jwt",
     "psycopg[binary,pool]",

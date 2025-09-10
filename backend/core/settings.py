@@ -32,7 +32,9 @@ ALLOWED_HOSTS: List[str] = ["*"]
 
 # 添加 CSRF 信任来源
 
-CSRF_TRUSTED_ORIGINS: List[str] = [f"{os.environ.get('FRONTEND_DOMAIN', 'http://localhost:30000')}"]
+FRONTEND_DOMAIN: str = os.environ.get("FRONTEND_DOMAIN", "http://localhost:30000")
+
+CSRF_TRUSTED_ORIGINS: List[str] = [FRONTEND_DOMAIN]
 
 # 添加 X-Forwarded 代理支持
 
@@ -148,6 +150,14 @@ MEDIA_ROOT: str = os.path.join(BASE_DIR, "media")
 DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
 # 设置 simpleui
-SIMPLEUI_HOME_INFO = False
-SIMPLEUI_DEFAULT_THEME = "element.css"
+SIMPLEUI_HOME_INFO: bool = False
+SIMPLEUI_DEFAULT_THEME: str = "element.css"
 # SIMPLEUI_LOGO = ''
+
+# 邮箱配置
+EMAIL_BACKEND: str = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST: str = "smtp.163.com"
+EMAIL_PORT: int = 25
+EMAIL_HOST_USER: str = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD: str = os.environ.get("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL: str = EMAIL_HOST_USER

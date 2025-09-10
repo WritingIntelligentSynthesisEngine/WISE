@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>激活您的账户</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background-color: #f5f5f5;
+        padding: 20px;
+      }
+      .email-container {
+        max-width: 1024px;
+        margin: 0 auto;
+        background-color: #fff;
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        padding: 24px 20px;
+        background-color: #2c2c2c;
+        color: #fff;
+        border-bottom: 1px solid #ddd;
+      }
+      .header h1 {
+        font-size: 24px;
+        font-weight: 1024;
+      }
+      .content {
+        padding: 32px;
+        background-color: #fff;
+      }
+      .content p {
+        margin-bottom: 24px;
+        font-size: 16px;
+        line-height: 1.6;
+      }
+      .button-container {
+        text-align: center;
+        margin: 24px 0;
+      }
+      .button {
+        display: inline-block;
+        padding: 16px 32px;
+        background-color: #2c2c2c;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 16px;
+        border: 1px solid #2c2c2c;
+        transition: background-color 0.3s;
+      }
+      .button:hover {
+        background-color: #4a4a4a;
+      }
+      .link-box {
+        word-break: break-all;
+        background-color: #f0f0f0;
+        padding: 16px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        margin: 20px 0;
+        font-size: 14px;
+        color: #555;
+      }
+      .footer {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+        font-size: 12px;
+        color: #777;
+        text-align: center;
+      }
+      .divider {
+        height: 1px;
+        background-color: #ddd;
+        margin: 24px 0;
+      }
+      .highlight {
+        font-weight: bold;
+        color: #2c2c2c;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="header">
+        <h1>欢迎加入书云!</h1>
+      </div>
+      <div class="content">
+        <p>您好 <span class="highlight">{{ user.username }}</span>,</p>
+        <p>感谢您注册我们的服务。请点击下面的按钮激活您的账户：</p>
+        <div class="button-container">
+          <a
+            href="{{ frontend_domain }}/api/account/verify/{{ uid }}/{{ token }}"
+            class="button"
+          >
+            激活账户
+          </a>
+        </div>
+        <div class="divider"></div>
+        <p>如果按钮无法点击，请复制以下链接到浏览器地址栏：</p>
+        <div class="link-box">
+          {{ frontend_domain }}/api/account/verify/{{ uid }}/{{ token }}
+        </div>
+        <p>如果您没有注册我们的服务，请忽略此邮件。</p>
+        <div class="footer">
+          <p>此邮件由系统自动发送，请勿直接回复。</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
