@@ -23,6 +23,7 @@ services:
       - "30001:30001"
     environment:
       BACKEND_IN_DOCKER: "True"
+      SECRET_KEY: "${SECRET_KEY}"
       BACKEND_DEBUG: "${BACKEND_DEBUG}"
       FRONTEND_DOMAIN: "${FRONTEND_DOMAIN}"
     networks:
