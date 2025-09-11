@@ -13,16 +13,18 @@ from django.contrib.auth import get_user_model
 from django.template.loader import render_to_string
 from django.contrib.auth.models import AbstractUser
 from django.utils.encoding import force_str, force_bytes
-from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
-from account.schemas import RegisterIn, AccountOut, LoginIn, LoginOut
+from account.schemas import (
+    RegisterIn,
+    AccountOut,
+    LoginIn,
+    LoginOut,
+)
 
 
-User = get_user_model()
-
-router = Router(tags=["账户"])
+router: Router = Router(tags=["账户"])
 
 
 class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
@@ -35,7 +37,11 @@ class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
         return f"{user.pk}{timestamp}{user.is_active}"
 
 
+# 动态获取当前项目中配置的用户模型类
+User: type[AbstractUser] = get_user_model()
+
 account_activation_token: AccountActivationTokenGenerator = AccountActivationTokenGenerator()
+password_reset_token: PasswordResetTokenGenerator = PasswordResetTokenGenerator()
 
 
 @router.post(
@@ -45,19 +51,28 @@ account_activation_token: AccountActivationTokenGenerator = AccountActivationTok
 )
 @transaction.atomic
 def register(request: HttpRequest, data: RegisterIn) -> Tuple[Literal[201], AccountOut]:
-    """注册账户并发送验证邮件"""
-    # 验证用户名或邮箱是否被占用
+    """注册账户并发送验证邮件, 如果邮箱已被注册但未激活, 则更新用户信息并重新发送激活邮件"""
+    # 检查用户名是否已被占用
     if User.objects.filter(username=data.username).exists():
         raise HttpError(400, "用户名已存在")
-    if User.objects.filter(email=data.email).exists():
-        raise HttpError(400, "邮箱已被注册")
-    # 创建未激活用户
-    user: AbstractUser = User.objects.create_user(
-        username=data.username,
-        email=data.email,
-        password=data.password,
-        is_active=False,
-    )
+    # 检查邮箱是否已被注册
+    if existing_user := User.objects.filter(email=data.email).first():
+        # 如果邮箱已注册且已激活, 返回错误
+        if existing_user.is_active:
+            raise HttpError(400, "邮箱已被注册")
+        # 如果邮箱已注册但未激活, 更新用户信息并重新发送激活邮件
+        existing_user.username = data.username
+        existing_user.set_password(data.password)
+        existing_user.save()
+        user: AbstractUser = existing_user
+    else:
+        # 创建新用户
+        user: AbstractUser = User.objects.create_user(
+            username=data.username,
+            email=data.email,
+            password=data.password,
+            is_active=False,
+        )
     # 邮件主题
     mail_subject: str = "激活您的账户"
     # 邮件消息
@@ -84,7 +99,7 @@ def register(request: HttpRequest, data: RegisterIn) -> Tuple[Literal[201], Acco
             date_joined=user.date_joined,
         )
     except Exception as e:
-        # 如果发送邮件失败, 事务会自动回滚, 用户不会被创建
+        # 如果发送邮件失败, 事务会自动回滚, 用户不会被创建或更新
         raise HttpError(500, f"邮件发送失败: {str(e)}")
 
 
@@ -110,7 +125,7 @@ def verify(request: HttpRequest, uidb64: str, token: str) -> Tuple[Literal[200],
             date_joined=user.date_joined,
         )
     else:
-        raise HttpError(400, "验证链接无效")
+        raise HttpError(400, "验证链接无效或已过期")
 
 
 @router.post(

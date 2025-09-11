@@ -96,24 +96,17 @@
   <body>
     <div class="email-container">
       <div class="header">
-        <h1>欢迎加入书云!</h1>
+        <h1>欢迎加入我们!</h1>
       </div>
       <div class="content">
         <p>您好 <span class="highlight">{{ user.username }}</span>,</p>
         <p>感谢您注册我们的服务。请点击下面的按钮激活您的账户：</p>
         <div class="button-container">
-          <a
-            href="{{ frontend_domain }}/api/account/verify/{{ uid }}/{{ token }}"
-            class="button"
-          >
-            激活账户
-          </a>
+          <a href="{{ frontend_domain }}/api/account/verify/{{ uid }}/{{ token }}" class="button"> 激活账户 </a>
         </div>
         <div class="divider"></div>
         <p>如果按钮无法点击，请复制以下链接到浏览器地址栏：</p>
-        <div class="link-box">
-          {{ frontend_domain }}/api/account/verify/{{ uid }}/{{ token }}
-        </div>
+        <div class="link-box">{{ frontend_domain }}/api/account/verify/{{ uid }}/{{ token }}</div>
         <p>如果您没有注册我们的服务，请忽略此邮件。</p>
         <div class="footer">
           <p>此邮件由系统自动发送，请勿直接回复。</p>

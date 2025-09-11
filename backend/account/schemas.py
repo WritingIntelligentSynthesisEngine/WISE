@@ -6,13 +6,8 @@ from pydantic import ValidationInfo, EmailStr, field_validator
 from ninja import Schema
 
 
-class RegisterIn(Schema):
-    """注册账户时输入"""
-
-    username: str
-    email: EmailStr
-    password: str
-    password_confirm: str
+class UsernameValidatorMixin:
+    """用户名验证混合类，提供通用的用户名验证方法"""
 
     @field_validator("username")
     @classmethod
@@ -21,20 +16,34 @@ class RegisterIn(Schema):
             raise ValueError("用户名至少需要3个字符")
         return v
 
+
+class PasswordValidatorMixin:
+    """密码验证混合类，提供通用的密码验证方法"""
+
     @field_validator("password")
     @classmethod
     def password_strength(cls: Type[Self], v: str) -> str:
         if len(v) < 8:
             raise ValueError("密码至少需要8个字符")
-        # 添加更多密码强度检查...
+        # TODO: 添加更多密码强度检查
         return v
 
     @field_validator("password_confirm")
     @classmethod
     def passwords_match(cls: Type[Self], v: str, info: ValidationInfo) -> str:
-        if "password" in info.data and v != info.data["password"]:
+        password_field = "password"
+        if password_field in info.data and v != info.data[password_field]:
             raise ValueError("密码不匹配")
         return v
+
+
+class RegisterIn(Schema, UsernameValidatorMixin, PasswordValidatorMixin):
+    """注册账户时输入"""
+
+    username: str
+    email: EmailStr
+    password: str
+    password_confirm: str
 
 
 class AccountOut(Schema):

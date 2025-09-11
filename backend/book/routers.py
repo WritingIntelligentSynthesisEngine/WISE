@@ -16,10 +16,17 @@ from utils import path_util, authentication_util
 from core.permissions import is_admin, is_active
 from book.permissions import can_delete, can_update, can_view
 from book.models import Book, Category, UserBookRelation, Chapter
-from book.schemas import BookCreateIn, BookUpdateIn, BookOut, ChapterCreateIn, ChapterUpdateIn, ChapterOut
+from book.schemas import (
+    BookCreateIn,
+    BookUpdateIn,
+    BookOut,
+    ChapterCreateIn,
+    ChapterUpdateIn,
+    ChapterOut,
+)
 
 
-router = Router(tags=["书籍与文章"])
+router: Router = Router(tags=["书籍与文章"])
 
 
 @router.post(
