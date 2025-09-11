@@ -68,3 +68,16 @@ class LoginOut(Schema):
     access: str
     refresh: str
     account: AccountOut
+
+
+class PasswordResetRequestIn(Schema):
+    """请求重置密码时输入"""
+
+    email: EmailStr
+
+
+class PasswordResetConfirmIn(Schema, PasswordValidatorMixin):
+    """确认重置密码时输入"""
+
+    password: str
+    password_confirm: str

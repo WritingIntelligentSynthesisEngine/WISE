@@ -21,6 +21,8 @@ from account.schemas import (
     AccountOut,
     LoginIn,
     LoginOut,
+    PasswordResetRequestIn,
+    PasswordResetConfirmIn,
 )
 
 
@@ -153,3 +155,65 @@ def login(request: HttpRequest, data: LoginIn) -> Tuple[Literal[201], LoginOut]:
             date_joined=user.date_joined,
         ),
     )
+
+
+@router.post(
+    "/password-reset-request",
+    summary="请求重置密码",
+    response={200: Dict[str, str], 500: Dict[str, str]},
+)
+def password_reset_request(request: HttpRequest, data: PasswordResetRequestIn) -> Tuple[Literal[200], Dict[str, str]]:
+    """请求重置密码"""
+    try:
+        user: AbstractUser | None = User.objects.get(email=data.email)
+    except User.DoesNotExist:
+        # 出于安全考虑, 即使邮箱不存在也返回成功
+        return 200, {"message": "如果邮箱存在, 重置链接已发送"}
+    # 邮件主题
+    mail_subject: str = "重置您的密码"
+    # 邮件消息
+    message: str = render_to_string(
+        "password_reset_email.html",
+        {
+            "user": user,
+            "frontend_domain": settings.FRONTEND_DOMAIN,
+            "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+            "token": password_reset_token.make_token(user),
+        },
+    )
+    # 创建邮件
+    email: EmailMessage = EmailMessage(mail_subject, message, to=[data.email])
+    # 设置为 HTML 内容类型
+    email.content_subtype = "html"
+    # 发送邮件
+    try:
+        email.send()
+        return 200, {"message": "如果邮箱存在, 重置链接已发送"}
+    except Exception as e:
+        raise HttpError(500, f"邮件发送失败: {str(e)}")
+
+
+@router.post(
+    "/password-reset-confirm/{uidb64}/{token}",
+    summary="确认重置密码",
+    response={200: Dict[str, str], 400: Dict[str, str], 403: Dict[str, str]},
+)
+def password_reset_confirm(request: HttpRequest, uidb64: str, token: str, data: PasswordResetConfirmIn) -> Tuple[Literal[200], Dict[str, str]]:
+    """确认重置密码"""
+    try:
+        # 解码 Base64 编码的用户 ID 并获取用户对象
+        uid: str = force_str(urlsafe_base64_decode(uidb64))
+        user: AbstractUser | None = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        raise HttpError(400, "重置链接无效或已过期")
+    # 验证令牌有效性
+    if user is not None and password_reset_token.check_token(user, token):
+        # 检查用户是否已激活
+        if not user.is_active:
+            raise HttpError(403, "账户未激活, 请先验证邮箱")
+        # 设置新密码并保存用户
+        user.set_password(data.password)
+        user.save()
+        return 200, {"message": "密码重置成功"}
+    else:
+        raise HttpError(400, "重置链接无效或已过期")
