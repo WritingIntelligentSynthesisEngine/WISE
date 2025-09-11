@@ -3,6 +3,7 @@ from typing import Self, Dict, Tuple, Literal
 
 from ninja import Router
 from django.conf import settings
+from django.db import transaction
 from ninja.errors import HttpError
 from django.http import HttpRequest
 from ninja_jwt.tokens import RefreshToken
@@ -25,6 +26,10 @@ router = Router(tags=["账户"])
 
 
 class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
+    """用于生成账户激活令牌的类
+
+    通过重写 _make_hash_value 方法, 使用用户的主键、时间戳和激活状态来生成令牌的哈希值,这样可以确保令牌与用户的当前是否激活相关联, 提高安全性
+    """
 
     def _make_hash_value(self: Self, user, timestamp) -> str:
         return f"{user.pk}{timestamp}{user.is_active}"
@@ -36,8 +41,9 @@ account_activation_token: AccountActivationTokenGenerator = AccountActivationTok
 @router.post(
     "/register",
     summary="注册账户",
-    response={201: AccountOut, 400: Dict[str, str]},
+    response={201: AccountOut, 400: Dict[str, str], 500: Dict[str, str]},
 )
+@transaction.atomic
 def register(request: HttpRequest, data: RegisterIn) -> Tuple[Literal[201], AccountOut]:
     """注册账户并发送验证邮件"""
     # 验证用户名或邮箱是否被占用
@@ -69,13 +75,17 @@ def register(request: HttpRequest, data: RegisterIn) -> Tuple[Literal[201], Acco
     # 设置为 HTML 内容类型
     email.content_subtype = "html"
     # 发送邮件
-    email.send()
-    return 201, AccountOut(
-        username=user.username,
-        email=user.email,
-        is_active=user.is_active,
-        date_joined=user.date_joined,
-    )
+    try:
+        email.send()
+        return 201, AccountOut(
+            username=user.username,
+            email=user.email,
+            is_active=user.is_active,
+            date_joined=user.date_joined,
+        )
+    except Exception as e:
+        # 如果发送邮件失败, 事务会自动回滚, 用户不会被创建
+        raise HttpError(500, f"邮件发送失败: {str(e)}")
 
 
 @router.get(
