@@ -13,7 +13,7 @@ from django.db.models.manager import BaseManager
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 
 from utils import path_util, authentication_util
-from core.permissions import is_admin, is_active
+from account.permissions import is_admin, is_active
 from book.permissions import can_delete, can_update, can_view
 from book.models import Book, Category, UserBookRelation, Chapter
 from book.schemas import (

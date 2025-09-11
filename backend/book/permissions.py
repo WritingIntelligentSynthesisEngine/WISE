@@ -2,7 +2,7 @@
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 
 from book.models import Book, UserBookRelation
-from core.permissions import is_admin, is_active
+from account.permissions import is_admin, is_active
 
 
 def is_author(user: AbstractUser | AnonymousUser, book: Book) -> bool:

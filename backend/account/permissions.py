@@ -1,4 +1,4 @@
-# core/permissions.py
+# account/permissions.py
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 
 
