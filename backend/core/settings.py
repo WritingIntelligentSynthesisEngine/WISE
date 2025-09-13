@@ -98,7 +98,7 @@ DATABASES: Dict[str, Dict[str, str]] = {
         "NAME": "abc",
         "USER": "admin",
         "PASSWORD": "passwd",
-        "HOST": "postgres" if os.environ.get("BACKEND_IN_DOCKER", "False") == "True" else "localhost",
+        "HOST": "abc-database" if os.environ.get("BACKEND_IN_DOCKER", "False") == "True" else "localhost",
         "PORT": "5432" if os.environ.get("BACKEND_IN_DOCKER", "False") == "True" else "30002",
     },
 }
