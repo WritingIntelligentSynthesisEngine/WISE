@@ -1,7 +1,7 @@
 services:
   Frontend:
     image: nginx:latest
-    container_name: nginx
+    container_name: frontend
     ports:
       - "30000:80"
     volumes:
@@ -32,7 +32,7 @@ services:
     restart: unless-stopped
   Database:
     image: postgres:latest
-    container_name: postgres
+    container_name: database
     ports:
       - "30002:5432"
     environment:

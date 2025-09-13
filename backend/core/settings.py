@@ -88,10 +88,10 @@ WSGI_APPLICATION: str = "core.wsgi.application"
 DATABASES: Dict[str, Dict[str, str]] = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "abc",
+        "NAME": "postgres",
         "USER": "admin",
         "PASSWORD": "passwd",
-        "HOST": "postgres" if os.environ.get("BACKEND_IN_DOCKER", "False") == "True" else "localhost",
+        "HOST": "database" if os.environ.get("BACKEND_IN_DOCKER", "False") == "True" else "localhost",
         "PORT": "5432" if os.environ.get("BACKEND_IN_DOCKER", "False") == "True" else "30002",
     },
 }
