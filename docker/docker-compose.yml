@@ -6,7 +6,7 @@ services:
       - "30000:80"
     volumes:
       - type: bind
-        source: ./nginx/conf.d
+        source: ./frontend/conf.d
         target: /etc/nginx/conf.d
         read_only: true
       - type: bind
@@ -40,7 +40,7 @@ services:
       POSTGRES_PASSWORD: passwd
     volumes:
       - type: bind
-        source: ./postgres/data
+        source: ./database/data
         target: /var/lib/postgresql/data
     networks:
       - default

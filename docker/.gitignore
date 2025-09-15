@@ -1,2 +1,4 @@
-nginx/html/
-postgres/data/
+*.exe
+
+frontend/html/
+database/data/

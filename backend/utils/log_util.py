@@ -48,6 +48,8 @@ def setup_logging(log_level: int = logging.INFO) -> None:
     root_logger.addHandler(file_handler)
     # 设置标志(已在全局作用域申明)
     _logging_initialized = True
+    # 禁用第三方库的日志传播
+    logging.getLogger("django").propagate = False
     # 记录初始化信息
     root_logger.info("📝日志系统初始化完成, 日志级别设置为: %s", logging.getLevelName(log_level))
 
