@@ -15,6 +15,9 @@ import os
 from pathlib import Path
 from typing import Any, List, Dict, Tuple
 
+from utils import log_util
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR: Path = Path(__file__).resolve().parent.parent
 
@@ -149,10 +152,15 @@ MEDIA_ROOT: str = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
-# 设置 simpleui
+# simpleui 配置
 SIMPLEUI_HOME_INFO: bool = False
 SIMPLEUI_DEFAULT_THEME: str = "element.css"
-# SIMPLEUI_LOGO = ''
+# SIMPLEUI_LOGO: str = ''
+
+# log 配置
+# 仅在主进程中初始化日志系统
+if os.environ.get("RUN_MAIN") == "true":
+    log_util.setup_logging()
 
 # 邮箱配置
 EMAIL_BACKEND: str = "django.core.mail.backends.smtp.EmailBackend"
