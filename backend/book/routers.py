@@ -39,7 +39,7 @@ def create_book(
     request: HttpRequest,
     data: BookCreateIn,
     cover_image: Optional[UploadedFile] = File(None),  # type: ignore
-) -> Tuple[Literal[201], Book]:
+) -> Tuple[Literal[201], BookOut]:
     """创建书籍, 如果有封面则保存在媒体目录, 并且创建用户与书籍的作者关系"""
     # 获取分类
     try:
@@ -61,7 +61,7 @@ def create_book(
         user=request.user,
         creative_role="author",
     )
-    return 201, book
+    return 201, BookOut.model_validate(book)
 
 
 @router.delete(
@@ -99,7 +99,7 @@ def update_book(
     book_id: int,
     data: BookUpdateIn,
     cover_image: Optional[UploadedFile] = File(None),  # type: ignore
-) -> Tuple[Literal[200], Book]:
+) -> Tuple[Literal[200], BookOut]:
     """更新书籍"""
     # 获取要更新的书籍
     try:
@@ -125,7 +125,7 @@ def update_book(
     if cover_image is not None:
         book.cover_image_path = save_cover_image(cover_image)
     book.save()
-    return 200, book
+    return 200, BookOut.model_validate(book)
 
 
 # 获取书籍列表
@@ -141,7 +141,7 @@ def get_books(
     page_size: int = 20,
     category_id: Optional[int] = None,
     status: Optional[str] = None,
-) -> Tuple[Literal[200], BaseManager[Book]]:
+) -> Tuple[Literal[200], List[BookOut]]:
     """获取书籍列表, 支持过滤和分页"""
     # 获取所有书籍
     queryset: BaseManager[Book] = Book.objects.all()
@@ -161,7 +161,7 @@ def get_books(
     # 分页
     start: int = (page - 1) * page_size
     end: int = start + page_size
-    return 200, queryset[start:end]
+    return 200, [BookOut.model_validate(book) for book in queryset[start:end]]
 
 
 @router.get(
@@ -173,7 +173,7 @@ def get_books(
 def get_book(
     request: HttpRequest,
     book_id: int,
-) -> Tuple[Literal[200], Book]:
+) -> Tuple[Literal[200], BookOut]:
     """获取特定书籍"""
     try:
         book = Book.objects.get(id=book_id)
@@ -182,7 +182,7 @@ def get_book(
         # 检查用户是否有权限查看书籍
     if book.status == "draft" and not can_view(request.user, book):
         raise HttpError(403, "没有查看权限")
-    return 200, book
+    return 200, BookOut.model_validate(book)
 
 
 @router.post(
@@ -195,7 +195,7 @@ def create_chapter(
     request: HttpRequest,
     book_id: int,
     data: ChapterCreateIn,
-) -> Tuple[Literal[201], Chapter]:
+) -> Tuple[Literal[201], ChapterOut]:
     """创建新章节"""
     # 获取书籍
     try:
@@ -215,7 +215,7 @@ def create_chapter(
         title=data.title,
         content=data.content,
     )
-    return 201, chapter
+    return 201, ChapterOut.model_validate(chapter)
 
 
 @router.patch(
@@ -229,7 +229,7 @@ def update_chapter(
     book_id: int,
     chapter_number: int,
     data: ChapterUpdateIn,
-) -> Tuple[Literal[200], Chapter]:
+) -> Tuple[Literal[200], ChapterOut]:
     """更新章节信息"""
     # 获取书籍
     try:
@@ -257,7 +257,7 @@ def update_chapter(
     if data.status is not None:
         chapter.status = data.status
     chapter.save()
-    return 200, chapter
+    return 200, ChapterOut.model_validate(chapter)
 
 
 @router.delete(
@@ -301,7 +301,7 @@ def get_chapters(
     book_id: int,
     page: int = 1,
     page_size: int = 20,
-) -> Tuple[Literal[200], BaseManager[Chapter]]:
+) -> Tuple[Literal[200], List[ChapterOut]]:
     """获取书籍的章节列表"""
     # 获取书籍
     try:
@@ -321,7 +321,7 @@ def get_chapters(
     # 分页
     start: int = (page - 1) * page_size
     end: int = start + page_size
-    return 200, queryset.order_by("chapter_number")[start:end]
+    return 200, [ChapterOut.model_validate(chapter) for chapter in queryset.order_by("chapter_number")[start:end]]
 
 
 @router.get(
@@ -334,7 +334,7 @@ def get_chapter(
     request: HttpRequest,
     book_id: int,
     chapter_number: int,
-) -> Tuple[Literal[200], Chapter]:
+) -> Tuple[Literal[200], ChapterOut]:
     """获取特定章节"""
     # 获取书籍
     try:
@@ -349,7 +349,7 @@ def get_chapter(
     # 检查权限
     if not can_view(request.user, book):
         raise HttpError(403, "没有查看权限")
-    return 200, chapter
+    return 200, ChapterOut.model_validate(chapter)
 
 
 def save_cover_image(cover_image: Optional[UploadedFile]) -> str:
