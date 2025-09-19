@@ -1,3 +1,3 @@
 :: scripts/runserver.bat
 cd "../"
-start cmd /k npm run lint
+start cmd /k pnpm run lint

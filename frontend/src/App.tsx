@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
 
 function App() {
@@ -24,19 +22,8 @@ function App() {
 
   return (
     <>
-      <div>
-        <a target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <h2>后端请求测试:</h2>
-        <p>{backendData}</p>
-      </div>
+      <p className="text-3xl font-bold">后端请求测试:</p>
+      <p className="text-3xl underline">{backendData}</p>
     </>
   );
 }
