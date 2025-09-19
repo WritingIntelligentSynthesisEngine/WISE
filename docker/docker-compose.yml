@@ -10,7 +10,7 @@ services:
         target: /etc/nginx/conf.d
         read_only: true
       - type: bind
-        source: ./nginx/html
+        source: ./frontend/html
         target: /usr/share/nginx/html
         read_only: true
     networks:

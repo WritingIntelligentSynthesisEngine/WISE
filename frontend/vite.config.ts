@@ -21,4 +21,8 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    outDir: "../docker/frontend/html/dist",
+    emptyOutDir: true,
+  },
 });
