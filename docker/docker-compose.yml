@@ -1,7 +1,7 @@
 services:
   Frontend:
     image: nginx:latest
-    container_name: abc-frontend
+    container_name: wise-frontend
     ports:
       - "30000:80"
     volumes:
@@ -17,8 +17,8 @@ services:
       - default
     restart: unless-stopped
   Backend:
-    image: knightfemale/abc-backend:latest
-    container_name: abc-backend
+    image: knightfemale/wise-backend:latest
+    container_name: wise-backend
     ports:
       - "30001:30001"
     volumes:
@@ -38,7 +38,7 @@ services:
     restart: unless-stopped
   Database:
     image: postgres:latest
-    container_name: abc-database
+    container_name: wise-database
     ports:
       - "30002:5432"
     environment:

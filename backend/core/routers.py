@@ -16,4 +16,4 @@ schema = SchemaControl(api_settings)
 )
 def hello(request: HttpRequest) -> str:
     """用于连通测试, 返回一个字符串"""
-    return "Hello AllBookCloud!"
+    return "Hello WISE!"

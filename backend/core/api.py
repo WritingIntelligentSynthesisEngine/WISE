@@ -6,7 +6,7 @@ from account.routers import router as account_router
 from book.routers import router as book_router
 
 
-api: NinjaExtraAPI = NinjaExtraAPI(title="AllBookCloud API")
+api: NinjaExtraAPI = NinjaExtraAPI(title="WISE API")
 
 # 服务核心 API
 api.add_router("/core", core_router)
