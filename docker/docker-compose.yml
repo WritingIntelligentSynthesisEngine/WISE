@@ -17,8 +17,8 @@ services:
       - default
     restart: unless-stopped
   Backend:
-    image: knightfemale/backend:latest
-    container_name: backend
+    image: knightfemale/djagon-backend:latest
+    container_name: djagon-backend
     ports:
       - "30001:30001"
     environment:
