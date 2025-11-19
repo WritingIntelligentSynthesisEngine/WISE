@@ -1,7 +1,7 @@
 services:
   Frontend:
     image: nginx:latest
-    container_name: frontend
+    container_name: "${COMPOSE_PROJECT_NAME}-frontend"
     ports:
       - "30000:80"
     volumes:
@@ -13,38 +13,37 @@ services:
         source: ./frontend/html
         target: /usr/share/nginx/html
         read_only: true
-    networks:
-      - default
     restart: unless-stopped
+    depends_on:
+      - Backend
   Backend:
     image: knightfemale/djagon-backend:latest
-    container_name: djagon-backend
+    container_name: "${COMPOSE_PROJECT_NAME}-backend"
     ports:
       - "30001:30001"
     environment:
-      BACKEND_IN_DOCKER: "True"
       SECRET_KEY: "${SECRET_KEY}"
       BACKEND_DEBUG: "${BACKEND_DEBUG}"
       FRONTEND_DOMAIN: "${FRONTEND_DOMAIN}"
-    networks:
-      - default
+      DATABASE_HOST: "${DATABASE_HOST}"
+      DATABASE_PORT: "${DATABASE_PORT}"
+      DATABASE_NAME: "${DATABASE_NAME}"
+      DATABASE_USER: "${DATABASE_USER}"
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
     command: uv run ./main.py
     restart: unless-stopped
+    depends_on:
+      - Database
   Database:
     image: postgres:17
-    container_name: database
+    container_name: "${COMPOSE_PROJECT_NAME}-database"
     ports:
       - "30002:5432"
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: passwd
+      POSTGRES_USER: "${DATABASE_USER}"
+      POSTGRES_PASSWORD: "${DATABASE_PASSWORD}"
     volumes:
       - type: bind
         source: ./database/data
         target: /var/lib/postgresql/data
-    networks:
-      - default
-
-networks:
-  default:
-    driver: bridge
+    restart: unless-stopped

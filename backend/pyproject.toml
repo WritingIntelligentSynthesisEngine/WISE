@@ -5,6 +5,7 @@ requires-python = ">=3.13,<3.14"
 dependencies = [
     "uvicorn",
     "django-ninja",
+    "python-dotenv",
     "django-simpleui",
     "psycopg[binary,pool]",
 ]

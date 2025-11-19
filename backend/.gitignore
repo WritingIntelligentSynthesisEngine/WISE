@@ -1,5 +1,5 @@
 *.exe
+*.env
 *.pyc
-runserver*.bat
 
 logs/

@@ -26,16 +26,16 @@ BASE_DIR: Path = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY: str = os.environ.get("SECRET_KEY", "django-insecure-j37=g=p4$zrs7_78lzf&kiuf=urxptbv$xsjk7l4^1jl6f9zb!")
+SECRET_KEY: str = f"{os.environ.get("SECRET_KEY")}"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG: bool = os.environ.get("BACKEND_DEBUG", "True") == "True"
+DEBUG: bool = os.environ.get("BACKEND_DEBUG") == "True"
 
 ALLOWED_HOSTS: List[str] = ["*"]
 
 # 添加 CSRF 信任来源
 
-CSRF_TRUSTED_ORIGINS: List[str] = [f"{os.environ.get('FRONTEND_DOMAIN', 'http://localhost:30000')}"]
+CSRF_TRUSTED_ORIGINS: List[str] = [f"{os.environ.get('FRONTEND_DOMAIN')}"]
 
 # 添加 X-Forwarded 代理支持
 
@@ -91,11 +91,11 @@ WSGI_APPLICATION: str = "core.wsgi.application"
 DATABASES: Dict[str, Dict[str, str]] = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "admin",
-        "PASSWORD": "passwd",
-        "HOST": "database" if os.environ.get("BACKEND_IN_DOCKER", "False") == "True" else "localhost",
-        "PORT": "5432" if os.environ.get("BACKEND_IN_DOCKER", "False") == "True" else "30002",
+        "NAME": f"{os.environ.get('DATABASE_NAME')}",
+        "USER": f"{os.environ.get('DATABASE_USER')}",
+        "PASSWORD": f"{os.environ.get('DATABASE_PASSWORD')}",
+        "HOST": f"{os.environ.get('DATABASE_HOST')}",
+        "PORT": f"{os.environ.get('DATABASE_PORT')}",
     },
 }
 
