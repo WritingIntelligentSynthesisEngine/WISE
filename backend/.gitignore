@@ -1,6 +1,6 @@
 *.exe
+*.env
 *.pyc
-runserver*.bat
 
 logs/
 media/

@@ -1,2 +1,2 @@
 cd "../"
-start cmd /k docker-compose up -d
+start cmd /k docker compose up -d
