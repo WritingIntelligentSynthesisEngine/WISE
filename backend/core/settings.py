@@ -57,6 +57,7 @@ INSTALLED_APPS: List[str] = [
     "ninja_jwt",
     "book.apps.BookConfig",
     "account.apps.AccountConfig",
+    "ai.apps.AiConfig",
 ]
 
 MIDDLEWARE: List[str] = [
