@@ -9,4 +9,5 @@ dependencies = [
     "django-simpleui",
     "django-ninja-jwt",
     "psycopg[binary,pool]",
+    "langchain[deepseek,community]",
 ]
