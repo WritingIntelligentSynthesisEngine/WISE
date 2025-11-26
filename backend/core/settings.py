@@ -163,8 +163,8 @@ if os.environ.get("RUN_MAIN") == "true":
 
 # 邮箱配置
 EMAIL_BACKEND: str = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST: str = "smtp.163.com"
-EMAIL_PORT: int = 25
-EMAIL_HOST_USER: str = os.environ.get("EMAIL_HOST_USER", "")
-EMAIL_HOST_PASSWORD: str = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_HOST: str = f"{os.environ.get("EMAIL_HOST")}"
+EMAIL_PORT: int = int(f"{os.environ.get("EMAIL_PORT")}")
+EMAIL_HOST_USER: str = f"{os.environ.get("EMAIL_HOST_USER")}"
+EMAIL_HOST_PASSWORD: str = f"{os.environ.get("EMAIL_HOST_PASSWORD")}"
 DEFAULT_FROM_EMAIL: str = EMAIL_HOST_USER
