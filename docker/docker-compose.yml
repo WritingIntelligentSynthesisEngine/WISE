@@ -21,10 +21,6 @@ services:
     container_name: "${COMPOSE_PROJECT_NAME}-backend"
     ports:
       - "30001:30001"
-    volumes:
-      - type: bind
-        source: ./frontend/html/media
-        target: /workspace/media
     environment:
       SECRET_KEY: "${SECRET_KEY}"
       BACKEND_DEBUG: "${BACKEND_DEBUG}"
@@ -36,6 +32,13 @@ services:
       DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       EMAIL_HOST_USER: "${EMAIL_HOST_USER}"
       EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD}"
+    volumes:
+      - type: bind
+        source: ./backend/logs
+        target: /workspace/logs
+      - type: bind
+        source: ./frontend/html/media
+        target: /workspace/media
     command: uv run ./main.py
     restart: unless-stopped
     depends_on:
