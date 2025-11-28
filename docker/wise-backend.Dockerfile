@@ -7,10 +7,10 @@ WORKDIR /workspace
 RUN uv --no-cache python install 3.13
 
 # 复制环境配置
-COPY pyproject.toml uv.lock /workspace/
+COPY pyproject.toml uv.lock ./
 
 # 同步依赖
-RUN uv --no-cache sync --frozen
+RUN uv sync --frozen --no-dev --no-cache
 
 # 复制源码
-COPY . /workspace
+COPY . .

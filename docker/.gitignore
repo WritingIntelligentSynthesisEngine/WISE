@@ -2,4 +2,5 @@
 *.env
 
 frontend/html/
+backend/logs/
 database/data/
