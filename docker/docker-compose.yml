@@ -49,5 +49,5 @@ services:
     volumes:
       - type: bind
         source: ./database/data
-        target: /var/lib/postgresql/data
+        target: /var/lib/postgresql/18/docker
     restart: unless-stopped
