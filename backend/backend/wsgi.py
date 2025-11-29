@@ -1,6 +1,6 @@
-# core/wsgi.py
+# backend/wsgi.py
 """
-WSGI config for core project.
+WSGI config for backend project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -14,6 +14,6 @@ from django.core.wsgi import get_wsgi_application
 from django.core.handlers.wsgi import WSGIHandler
 
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 
 application: WSGIHandler = get_wsgi_application()

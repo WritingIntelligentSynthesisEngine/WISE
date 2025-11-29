@@ -4,7 +4,7 @@ FROM ghcr.io/astral-sh/uv:debian-slim
 WORKDIR /workspace
 
 # 下载 python
-RUN uv --no-cache python install 3.13
+RUN uv --no-cache python install 3.14
 
 # 复制环境配置
 COPY pyproject.toml uv.lock ./

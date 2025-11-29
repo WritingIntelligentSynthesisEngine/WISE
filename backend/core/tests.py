@@ -1,2 +1,2 @@
-# ai/tests.py
+# core/tests.py
 from django.test import TestCase
