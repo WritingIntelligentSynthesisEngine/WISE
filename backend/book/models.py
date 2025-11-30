@@ -7,7 +7,6 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Model, AutoField, IntegerField, CharField, TextField, DateTimeField, JSONField, ForeignKey, Avg, CASCADE
 
 
-# Create your models here.
 class Category(Model):
     """书籍分类模型, 存储书籍的分类类型"""
 
