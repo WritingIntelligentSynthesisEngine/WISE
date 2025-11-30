@@ -1,0 +1,2 @@
+# {{ app_name }}/admin.py
+from django.contrib import admin

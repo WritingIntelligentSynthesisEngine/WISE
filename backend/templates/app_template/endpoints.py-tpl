@@ -1,0 +1,2 @@
+# {{ app_name }}/endpoints.py
+from ninja import Router

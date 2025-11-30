@@ -1,0 +1,2 @@
+# {{ app_name }}/selectors.py
+from django.db.models import QuerySet

@@ -1,0 +1,4 @@
+# {{ app_name }}/services.py
+class {{ app_name|title }}Service:
+
+    pass

@@ -1,0 +1,2 @@
+# {{ app_name }}/schemas.py
+from ninja import Schema
