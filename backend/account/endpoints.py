@@ -1,4 +1,4 @@
-# account/routers.py
+# account/endpoints.py
 from typing import Self, Dict, Tuple, Literal
 
 from ninja import Router
