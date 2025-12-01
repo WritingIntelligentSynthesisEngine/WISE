@@ -138,7 +138,11 @@ USE_TZ: bool = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+# 用于在模板中引用的静态文件路径前缀
 STATIC_URL: str = "/static/"
+
+# 收集静态文件的目录绝对路径
+STATIC_ROOT = os.path.join(BASE_DIR.parent / Path("docker/frontend/html"), "static")
 
 MEDIA_URL: str = "/media/"
 

@@ -1,2 +1,2 @@
 cd "../"
-start cmd /k .\.venv\Scripts\python.exe .\manage.py test
+start cmd /k .\.venv\Scripts\python.exe .\scripts\scripts.py test

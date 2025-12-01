@@ -1,2 +1,2 @@
 cd "../"
-start cmd /k .\.venv\Scripts\python.exe .\manage.py migrate
+start cmd /k .\.venv\Scripts\python.exe .\scripts\scripts.py migrate
