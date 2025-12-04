@@ -55,6 +55,6 @@ services:
       POSTGRES_PASSWORD: "${DATABASE_PASSWORD}"
     volumes:
       - type: bind
-        source: ./database/data
-        target: /var/lib/postgresql/18/docker
+        source: ./database/postgresql
+        target: /var/lib/postgresql
     restart: unless-stopped
