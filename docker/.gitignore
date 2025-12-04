@@ -3,4 +3,4 @@
 
 frontend/html/
 backend/logs/
-database/data/
+database/postgresql/
