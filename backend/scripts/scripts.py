@@ -3,9 +3,9 @@ import os
 import sys
 from pathlib import Path
 from typing import Any, Dict
+from dotenv import load_dotenv
 
 import django
-from django.conf import settings
 from django.core.management import execute_from_command_line
 
 
@@ -18,14 +18,14 @@ def createdatabase() -> None:
         from psycopg import sql
 
         # 从 Django 配置获取数据库配置
-        db_name: str = settings.DATABASES["default"]["NAME"]
+        db_name: str = f"{os.environ.get('DATABASE_NAME')}"
         # 首先连接到 postgres 数据库来检查目标数据库是否存在
         conn_params: Dict[str, Any] = {
             "dbname": "postgres",
-            "user": settings.DATABASES["default"]["USER"],
-            "password": settings.DATABASES["default"]["PASSWORD"],
-            "host": settings.DATABASES["default"]["HOST"],
-            "port": settings.DATABASES["default"]["PORT"],
+            "user": f"{os.environ.get('DATABASE_USER')}",
+            "password": f"{os.environ.get('DATABASE_PASSWORD')}",
+            "host": f"{os.environ.get('DATABASE_HOST')}",
+            "port": f"{os.environ.get('DATABASE_PORT')}",
         }
         try:
             # 尝试连接到 postgres 数据库, 并设置自动提交
@@ -192,6 +192,8 @@ def collectstatic() -> None:
 
 
 def main() -> None:
+    # 加载环境变量
+    load_dotenv()
     # 添加项目根目录到 Python 路径
     sys.path.insert(0, str(Path(__file__).parent.parent))
     # 设置 Django 环境变量
@@ -202,7 +204,7 @@ def main() -> None:
     if len(sys.argv) < 2:
         print("请指定要执行的函数名")
         sys.exit(1)
-    function_name = sys.argv[1]
+    function_name: str = sys.argv[1]
     if function_name == "migrate":
         migrate()
     elif function_name == "createsuperuser":
