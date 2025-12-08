@@ -9,3 +9,7 @@ dependencies = [
     "django-simpleui",
     "psycopg[binary,pool]",
 ]
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
