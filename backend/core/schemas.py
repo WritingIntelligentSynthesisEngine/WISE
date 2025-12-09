@@ -1,11 +1,25 @@
 # core/schemas.py
-from ninja import Schema
 from datetime import datetime
+from typing import Optional, TypeVar, Generic
+
+from ninja import Schema
+from pydantic import Field
 
 
-class StatusOut(Schema):
-    """状态输出"""
+T = TypeVar("T")
 
-    status: str
-    message: str
-    timestamp: datetime
+
+class OutSchema(Schema, Generic[T]):
+    """标准输出"""
+
+    message: str = Field(default="success", description="消息")
+    data: Optional[T] = Field(default=None, description="响应数据")
+    errors: Optional[ErrorOutSchema] = Field(default=None, description="错误详情")
+    timestamp: datetime = Field(default_factory=datetime.now, description="时间戳")
+
+
+class ErrorOutSchema(Schema):
+    """错误详情"""
+
+    field: Optional[str] = Field(None, description="错误字段")
+    message: str = Field(description="错误信息")
