@@ -2,8 +2,7 @@
 from datetime import datetime
 from typing import Optional, TypeVar, Generic
 
-from ninja import Schema
-from pydantic import Field
+from ninja import Schema, Field
 
 
 T = TypeVar("T")
@@ -14,11 +13,11 @@ class OutSchema(Schema, Generic[T]):
 
     message: str = Field(default="success", description="消息")
     data: Optional[T] = Field(default=None, description="响应数据")
-    errors: Optional[ErrorOutSchema] = Field(default=None, description="错误详情")
+    errors: Optional[ErrorDetailSchema] = Field(default=None, description="错误详情")
     timestamp: datetime = Field(default_factory=datetime.now, description="时间戳")
 
 
-class ErrorOutSchema(Schema):
+class ErrorDetailSchema(Schema):
     """错误详情"""
 
     field: Optional[str] = Field(None, description="错误字段")
