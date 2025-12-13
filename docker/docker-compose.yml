@@ -23,6 +23,7 @@ services:
       - "30001:30001"
     environment:
       SECRET_KEY: "${SECRET_KEY}"
+      BACKEND_WORKERS: "${BACKEND_WORKERS}"
       BACKEND_DEBUG: "${BACKEND_DEBUG}"
       FRONTEND_DOMAIN: "${FRONTEND_DOMAIN}"
       DATABASE_HOST: "${DATABASE_HOST}"
