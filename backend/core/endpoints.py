@@ -19,5 +19,6 @@ router: Router = Router(tags=["核心"])
 )
 def get_status(request: HttpRequest) -> Tuple[Literal[200], OutSchema[str]]:
     """获取服务状态信息"""
+
     data = CoreService.get_service_status()
-    return 200, OutSchema(**data)
+    return 200, OutSchema(data=data)
