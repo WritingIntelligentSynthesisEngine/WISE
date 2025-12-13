@@ -1,6 +1,7 @@
 # main.py
+import os
 import uvicorn
-import multiprocessing
+from dotenv import load_dotenv
 
 
 def main() -> None:
@@ -8,10 +9,11 @@ def main() -> None:
         "backend.asgi:application",
         host="0.0.0.0",
         port=30001,
-        workers=multiprocessing.cpu_count(),
+        workers=int(os.environ.get("BACKEND_WORKERS", 1)),
         reload=False,
     )
 
 
 if __name__ == "__main__":
+    load_dotenv()
     main()

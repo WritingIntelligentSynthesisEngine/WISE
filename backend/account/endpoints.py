@@ -79,10 +79,10 @@ def register(request: HttpRequest, data: RegisterIn) -> Tuple[Literal[201], Acco
     mail_subject: str = "激活您的账户"
     # 邮件消息
     message: str = render_to_string(
-        "active_email.html",
+        "html/active_email.html",
         {
             "user": user,
-            "frontend_domain": settings.FRONTEND_DOMAIN,
+            "frontend_domain": settings.CSRF_TRUSTED_ORIGINS[0],
             "uid": urlsafe_base64_encode(force_bytes(user.pk)),
             "token": account_activation_token.make_token(user),
         },
@@ -173,10 +173,10 @@ def password_reset_request(request: HttpRequest, data: PasswordResetRequestIn) -
     mail_subject: str = "重置您的密码"
     # 邮件消息
     message: str = render_to_string(
-        "password_reset_email.html",
+        "html/password_reset_email.html",
         {
             "user": user,
-            "frontend_domain": settings.FRONTEND_DOMAIN,
+            "frontend_domain": settings.CSRF_TRUSTED_ORIGINS[0],
             "uid": urlsafe_base64_encode(force_bytes(user.pk)),
             "token": password_reset_token.make_token(user),
         },

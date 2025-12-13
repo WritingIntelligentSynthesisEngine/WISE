@@ -2,4 +2,4 @@
 .env.example
 
 scripts/
-templates/
+app_template/

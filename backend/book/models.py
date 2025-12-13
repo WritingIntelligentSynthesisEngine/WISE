@@ -49,11 +49,17 @@ class Book(Model):
     title: CharField = CharField(
         verbose_name="书名",
         max_length=128,
+        default="",
     )
     # 简介
     description: TextField = TextField(
         verbose_name="简介",
-        default="无",
+        default="",
+    )
+    # 设定
+    settings: TextField = TextField(
+        verbose_name="设定",
+        default="",
     )
     # 封面图片路径
     cover_image_path: CharField = CharField(
@@ -211,6 +217,11 @@ class Chapter(Model):
     title: CharField = CharField(
         verbose_name="章节标题",
         max_length=128,
+        default="",
+    )
+    # 大纲
+    outline: TextField = TextField(
+        verbose_name="大纲",
         default="",
     )
     # 内容(JSON格式)
