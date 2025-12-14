@@ -7,7 +7,7 @@ from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain_core.runnables.base import RunnableSerializable
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-from utils.prompt_util import generate_outline_prompt
+from ai.prompts import generate_outline_prompt
 
 
 parser: StrOutputParser = StrOutputParser()

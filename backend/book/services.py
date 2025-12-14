@@ -1,17 +1,14 @@
 # book/services.py
-import os
-from pathlib import Path
-from typing import Optional, List, Dict
+from typing import List, Dict
 
-from django.conf import settings
+from ninja import UploadedFile
 from django.db import transaction
 from utils.exception_util import Error
-from ninja import UploadedFile, File
 from django.db.models.manager import BaseManager
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 
-from utils import path_util
 from book.models import Category, Book, UserBookRelation, Chapter
+from utils.file_util import save_cover_image, remove_unused_cover_image
 from book.schemas import BookCreateInSchema, BookUpdateInSchema, ChapterCreateInSchema, ChapterUpdateInSchema
 
 
@@ -21,10 +18,9 @@ class BookService:
     @staticmethod
     @transaction.atomic
     def create_book(
-        data: BookCreateInSchema,
         user: AbstractUser | AnonymousUser,
         category: Category,
-        cover_image: File[UploadedFile],
+        data: BookCreateInSchema,
     ) -> Book:
         """创建书籍, 并且创建用户与书籍的作者关系, 如果有封面则保存在媒体目录"""
 
@@ -33,7 +29,6 @@ class BookService:
             category=category,
             title=data.title,
             description=data.description,
-            cover_image_path=save_cover_image(cover_image),
             status="draft",
             attributes=data.attributes,
         )
@@ -56,33 +51,32 @@ class BookService:
         cover_image_path: str = book.cover_image_path
         # 先删除数据库记录, 这会级联删除所有相关的关系记录
         book.delete()
-        # 检索引用计数, 如果为 0 则删除封面图片
-        if cover_image_path:
-            # 检查是否有其他书籍使用相同的封面图片路径
-            other_books_with_same_cover: bool = Book.objects.filter(cover_image_path=cover_image_path).exists()
-            # 如果没有其他书籍使用相同的封面图片, 则删除文件
-            if not other_books_with_same_cover:
-                try:
-                    full_path: Path = settings.MEDIA_ROOT / Path("covers") / Path(cover_image_path)
-                    if os.path.exists(full_path):
-                        os.remove(full_path)
-                        # 尝试删除可能的空目录
-                        try:
-                            os.removedirs(os.path.dirname(full_path))
-                        except OSError:
-                            # 目录不为空或无法删除, 忽略错误
-                            pass
-                except (OSError, FileNotFoundError):
-                    # 文件删除失败, 记录日志或忽略
-                    pass
+        # 尝试删除封面
+        remove_unused_cover_image(cover_image_path)
+        return None
+
+    @staticmethod
+    @transaction.atomic
+    def delete_cover_image(
+        book: Book,
+    ) -> None:
+        """移除书籍封面"""
+
+        old_image_path: str = book.cover_image_path
+        if old_image_path:
+            # 清空数据库字段
+            book.cover_image_path = ""
+            book.save()
+            # 尝试删除封面
+            remove_unused_cover_image(old_image_path)
         return None
 
     @staticmethod
     @transaction.atomic
     def update_book(
+        category: Category | None,
         book: Book,
         data: BookUpdateInSchema,
-        cover_image: File[UploadedFile],
     ) -> Book:
         """更新书籍"""
 
@@ -93,15 +87,27 @@ class BookService:
             book.description = data.description
         if data.attributes is not None:
             book.attributes = data.attributes
-        if data.category_id is not None:
-            try:
-                category: Category = Category.objects.get(id=data.category_id)
-                book.category = category
-            except Category.DoesNotExist:
-                raise Error(404, "category_id", "无效的分类ID")
-        if cover_image is not None:
-            book.cover_image_path = save_cover_image(cover_image)
+        if category is not None:
+            book.category = category
         book.save()
+        return book
+
+    @staticmethod
+    @transaction.atomic
+    def update_cover_image(
+        book: Book,
+        cover_image: UploadedFile,
+    ) -> Book:
+        """更新书籍封面"""
+
+        old_image_path: str = book.cover_image_path
+        # 保存新封面
+        new_image_path: str = save_cover_image(cover_image)
+        book.cover_image_path = new_image_path
+        book.save()
+        # 如果存在旧封面且路径不同, 检查是否需要清理
+        if old_image_path and old_image_path != new_image_path:
+            remove_unused_cover_image(old_image_path)
         return book
 
     @staticmethod
@@ -223,23 +229,3 @@ class ChapterService:
         # 合并所有文本内容
         extracted_text = "".join([str(item.get("content", "")) for item in text_items])
         return extracted_text
-
-
-def save_cover_image(cover_image: Optional[UploadedFile]) -> str:
-    """保存封面图片"""
-
-    # 如果没有文件则直接返回空字符串
-    if cover_image is None:
-        return ""
-    # 生成基于哈希的路径
-    cover_image_path: Path = path_util.generate_hash_path(cover_image)
-    # 完整路径
-    full_path: Path = settings.MEDIA_ROOT / Path("covers") / cover_image_path
-    # 确保目录存在
-    os.makedirs(os.path.dirname(full_path), exist_ok=True)
-    # 只有在文件不存在时才保存
-    if not os.path.exists(full_path):
-        with open(full_path, "wb+") as destination:
-            for chunk in cover_image.chunks():
-                destination.write(chunk)
-    return str(cover_image_path)

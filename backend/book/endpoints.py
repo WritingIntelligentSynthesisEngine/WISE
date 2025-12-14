@@ -4,8 +4,8 @@ from typing import Optional, List, Tuple, Literal
 from django.db.models import Q
 from ninja.errors import HttpError
 from django.http import HttpRequest
+from ninja import Router, UploadedFile, File
 from django.db.models.manager import BaseManager
-from ninja import Router, UploadedFile, File, Form
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 
 from core.schemas import OutSchema
@@ -29,8 +29,7 @@ router: Router = Router(tags=["书籍与文章"])
 )
 def create_book(
     request: HttpRequest,
-    data: Form[BookCreateInSchema],
-    cover_image: File[UploadedFile] = None,  # pyright: ignore[reportArgumentType]
+    data: BookCreateInSchema,
 ) -> Tuple[Literal[201], OutSchema[BookOutSchema]]:
     """创建书籍, 如果有封面则保存在媒体目录, 并且创建用户与书籍的作者关系"""
 
@@ -41,8 +40,7 @@ def create_book(
         category: Category = Category.objects.get(id=data.category_id)
     except Category.DoesNotExist:
         raise Error(404, "category_id", "无效的分类ID")
-    # TODO 检测 cover_image 是否为图片
-    book: Book = BookService.create_book(data, user, category, cover_image)
+    book: Book = BookService.create_book(user, category, data)
     return 201, OutSchema(data=BookOutSchema.model_validate(book))
 
 
@@ -78,8 +76,7 @@ def delete_book(
 def update_book(
     request: HttpRequest,
     book_id: int,
-    data: Form[BookUpdateInSchema],
-    cover_image: File[UploadedFile] = None,  # pyright: ignore[reportArgumentType]
+    data: BookUpdateInSchema,
 ) -> Tuple[Literal[200], OutSchema[BookOutSchema]]:
     """更新书籍"""
 
@@ -90,7 +87,41 @@ def update_book(
         raise Error(404, "book_id", "书籍不存在")
     if not can_update(request.user, book):
         raise HttpError(403, "没有更新权限")
-    book = BookService.update_book(book, data, cover_image)
+    try:
+        category: Category | None = Category.objects.get(id=data.category_id) if data.category_id != None else None
+    except Category.DoesNotExist:
+        raise Error(404, "category_id", "无效的分类ID")
+    book = BookService.update_book(category, book, data)
+    return 200, OutSchema(data=BookOutSchema.model_validate(book))
+
+
+@router.patch(
+    "/books/{book_id}/cover/",
+    summary="更新封面图片",
+    auth=OptionalAuth(),
+    response={200: OutSchema[BookOutSchema], 403: OutSchema[None], 404: OutSchema[None]},
+)
+def upload_cover_image(
+    request: HttpRequest,
+    book_id: int,
+    cover_image: File[UploadedFile] = None,  # pyright: ignore[reportArgumentType]
+) -> Tuple[Literal[200], OutSchema[BookOutSchema]]:
+    """更新书籍封面"""
+
+    # 获取书籍
+    try:
+        book: Book = BookService.get_book(book_id)
+    except Book.DoesNotExist:
+        raise Error(404, "book_id", "书籍不存在")
+    # 检查权限
+    if not can_update(request.user, book):
+        raise Error(403, "permission", "没有更新权限")
+    if cover_image == None:
+        # 删除封面
+        BookService.delete_cover_image(book)
+    else:
+        # 更新封面
+        book = BookService.update_cover_image(book, cover_image)
     return 200, OutSchema(data=BookOutSchema.model_validate(book))
 
 
