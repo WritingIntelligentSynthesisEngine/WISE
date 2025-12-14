@@ -20,8 +20,8 @@ def register_exception_handlers(api: NinjaExtraAPI) -> None:
     """注册全局异常处理器"""
 
     @api.exception_handler(Error)
-    def handle_core_exception(request: HttpRequest, exc: Error) -> HttpResponse:
+    def handle_error(request: HttpRequest, exc: Error) -> HttpResponse:
         """处理默认异常"""
 
-        error_response = OutSchema(data=None, errors=ErrorDetailSchema(field=exc.field, message=exc.message))
+        error_response = OutSchema(message="error", errors=[ErrorDetailSchema(field=exc.field, message=exc.message)])
         return api.create_response(request, error_response, status=exc.status_code)
