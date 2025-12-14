@@ -5,7 +5,7 @@ from typing import Any, Optional, List, Dict
 from ninja import Schema
 
 
-class BookCreateIn(Schema):
+class BookCreateInSchema(Schema):
     """创建书籍时的输入"""
 
     category_id: Optional[int] = None
@@ -14,7 +14,7 @@ class BookCreateIn(Schema):
     attributes: Dict[str, Any] = {}
 
 
-class BookUpdateIn(Schema):
+class BookUpdateInSchema(Schema):
     """更新书籍时的输入"""
 
     category_id: Optional[int] = None
@@ -23,7 +23,7 @@ class BookUpdateIn(Schema):
     attributes: Optional[Dict[str, Any]] = None
 
 
-class BookOut(Schema):
+class BookOutSchema(Schema):
     """完整书籍的输出"""
 
     id: int
@@ -37,7 +37,7 @@ class BookOut(Schema):
     attributes: Dict[str, Any]
 
 
-class ChapterCreateIn(Schema):
+class ChapterCreateInSchema(Schema):
     """创建章节时的输入"""
 
     chapter_number: int
@@ -45,7 +45,7 @@ class ChapterCreateIn(Schema):
     content: List[Dict[str, Any]] = []
 
 
-class ChapterUpdateIn(Schema):
+class ChapterUpdateInSchema(Schema):
     """更新章节时的输入"""
 
     chapter_number: Optional[int] = None
@@ -54,7 +54,7 @@ class ChapterUpdateIn(Schema):
     status: Optional[str] = None
 
 
-class ChapterOut(Schema):
+class ChapterOutSchema(Schema):
     """完整章节的输出"""
 
     id: int
