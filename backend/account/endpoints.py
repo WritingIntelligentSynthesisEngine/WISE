@@ -193,6 +193,7 @@ def password_reset_request(request: HttpRequest, data: PasswordResetRequestIn) -
 )
 def password_reset_confirm(request: HttpRequest, uidb64: str, token: str, data: PasswordResetConfirmIn) -> Tuple[Literal[200], Dict[str, str]]:
     """确认重置密码"""
+
     try:
         # 解码 Base64 编码的用户 ID 并获取用户对象
         uid: str = force_str(urlsafe_base64_decode(uidb64))

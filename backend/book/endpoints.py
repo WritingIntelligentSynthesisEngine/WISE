@@ -4,7 +4,6 @@ from typing import Optional, List, Tuple, Literal
 from django.db.models import Q
 from ninja.errors import HttpError
 from django.http import HttpRequest
-from ninja_jwt.authentication import JWTAuth
 from django.db.models.manager import BaseManager
 from ninja import Router, UploadedFile, File, Form
 from django.contrib.auth.models import AbstractUser, AnonymousUser
@@ -73,7 +72,7 @@ def delete_book(
 @router.patch(
     "/books/{book_id}/",
     summary="更新书籍",
-    auth=JWTAuth(),
+    auth=OptionalAuth(),
     response={200: OutSchema[BookOutSchema], 403: OutSchema[None], 404: OutSchema[None]},
 )
 def update_book(

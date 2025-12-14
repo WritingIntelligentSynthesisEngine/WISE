@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional, List, Dict
 
 from django.conf import settings
+from django.db import transaction
 from utils.exception_util import Error
 from ninja import UploadedFile, File
 from django.db.models.manager import BaseManager
@@ -18,6 +19,7 @@ class BookService:
     """书籍服务类"""
 
     @staticmethod
+    @transaction.atomic
     def create_book(
         data: BookCreateInSchema,
         user: AbstractUser | AnonymousUser,
@@ -44,6 +46,7 @@ class BookService:
         return book
 
     @staticmethod
+    @transaction.atomic
     def delete_book(
         book: Book,
     ) -> None:
@@ -75,6 +78,7 @@ class BookService:
         return None
 
     @staticmethod
+    @transaction.atomic
     def update_book(
         book: Book,
         data: BookUpdateInSchema,
@@ -119,6 +123,7 @@ class ChapterService:
     """章节服务类"""
 
     @staticmethod
+    @transaction.atomic
     def create_chapter(
         book: Book,
         data: ChapterCreateInSchema,
@@ -138,6 +143,7 @@ class ChapterService:
         return chapter
 
     @staticmethod
+    @transaction.atomic
     def delete_chapter(
         chapter: Chapter,
     ) -> None:
@@ -147,6 +153,7 @@ class ChapterService:
         return None
 
     @staticmethod
+    @transaction.atomic
     def update_chapter(
         chapter: Chapter,
         data: ChapterUpdateInSchema,
