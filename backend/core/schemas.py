@@ -1,6 +1,6 @@
 # core/schemas.py
 from datetime import datetime
-from typing import Optional, TypeVar, Generic
+from typing import Optional, TypeVar, Generic, List
 
 from ninja import Schema, Field
 
@@ -13,7 +13,7 @@ class OutSchema(Schema, Generic[T]):
 
     message: str = Field(default="success", description="消息")
     data: Optional[T] = Field(default=None, description="响应数据")
-    errors: Optional[ErrorDetailSchema] = Field(default=None, description="错误详情")
+    errors: Optional[List[ErrorDetailSchema]] = Field(default=None, description="错误详情")
     timestamp: datetime = Field(default_factory=datetime.now, description="时间戳")
 
 
