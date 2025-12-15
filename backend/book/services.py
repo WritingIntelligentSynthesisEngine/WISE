@@ -19,7 +19,7 @@ class BookService:
     @transaction.atomic
     def create_book(
         user: AbstractUser | AnonymousUser,
-        category: Category,
+        category: Category | None,
         data: BookCreateInSchema,
     ) -> Book:
         """创建书籍, 并且创建用户与书籍的作者关系, 如果有封面则保存在媒体目录"""

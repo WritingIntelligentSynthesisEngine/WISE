@@ -5,6 +5,8 @@ from pydantic import ValidationInfo, EmailStr, field_validator
 
 from ninja import Schema
 
+from utils.exception_util import Error
+
 
 class UsernameValidatorMixin:
     """用户名验证混合类，提供通用的用户名验证方法"""
@@ -13,7 +15,7 @@ class UsernameValidatorMixin:
     @classmethod
     def username_length(cls: Type[Self], v: str) -> str:
         if len(v) < 3:
-            raise ValueError("用户名至少需要3个字符")
+            raise Error(400, "username", "用户名至少需要3个字符")
         return v
 
 
@@ -24,7 +26,7 @@ class PasswordValidatorMixin:
     @classmethod
     def password_strength(cls: Type[Self], v: str) -> str:
         if len(v) < 8:
-            raise ValueError("密码至少需要8个字符")
+            raise Error(400, "password", "密码至少需要8个字符")
         # TODO: 添加更多密码强度检查
         return v
 
@@ -33,11 +35,11 @@ class PasswordValidatorMixin:
     def passwords_match(cls: Type[Self], v: str, info: ValidationInfo) -> str:
         password_field = "password"
         if password_field in info.data and v != info.data[password_field]:
-            raise ValueError("密码不匹配")
+            raise Error(400, "password", "密码不匹配")
         return v
 
 
-class RegisterIn(Schema, UsernameValidatorMixin, PasswordValidatorMixin):
+class RegisterInSchema(Schema, UsernameValidatorMixin, PasswordValidatorMixin):
     """注册账户时输入"""
 
     username: str
@@ -46,7 +48,7 @@ class RegisterIn(Schema, UsernameValidatorMixin, PasswordValidatorMixin):
     password_confirm: str
 
 
-class AccountOut(Schema):
+class AccountOutSchema(Schema):
     """账户信息输出"""
 
     username: str
@@ -55,28 +57,27 @@ class AccountOut(Schema):
     date_joined: datetime
 
 
-class LoginIn(Schema):
+class LoginInSchema(Schema):
     """登录账户时输入"""
 
     username: str
     password: str
 
 
-class LoginOut(Schema):
-    """登录账户时输出"""
+class JwtOutSchema(Schema):
+    """JWT 输出"""
 
     access: str
     refresh: str
-    account: AccountOut
 
 
-class PasswordResetRequestIn(Schema):
-    """请求重置密码时输入"""
+class EmailRequestInSchema(Schema):
+    """邮箱验证时输入"""
 
     email: EmailStr
 
 
-class PasswordResetConfirmIn(Schema, PasswordValidatorMixin):
+class PasswordResetConfirmInSchema(Schema, PasswordValidatorMixin):
     """确认重置密码时输入"""
 
     password: str

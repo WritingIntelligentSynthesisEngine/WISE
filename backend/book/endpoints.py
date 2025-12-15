@@ -15,7 +15,14 @@ from utils.authentication_util import OptionalAuth
 from account.permissions import is_admin, is_active
 from book.services import BookService, ChapterService
 from book.permissions import can_delete, can_update, can_view
-from book.schemas import BookCreateInSchema, BookUpdateInSchema, BookOutSchema, ChapterCreateInSchema, ChapterUpdateInSchema, ChapterOutSchema
+from book.schemas import (
+    BookCreateInSchema,
+    BookUpdateInSchema,
+    BookOutSchema,
+    ChapterCreateInSchema,
+    ChapterUpdateInSchema,
+    ChapterOutSchema,
+)
 
 
 router: Router = Router(tags=["书籍与文章"])
@@ -37,7 +44,7 @@ def create_book(
     if not user.is_active:
         raise Error(403, "permission", "没有创建权限")
     try:
-        category: Category = Category.objects.get(id=data.category_id)
+        category: Category | None = Category.objects.get(id=data.category_id) if data.category_id != None else None
     except Category.DoesNotExist:
         raise Error(404, "category_id", "无效的分类ID")
     book: Book = BookService.create_book(user, category, data)
