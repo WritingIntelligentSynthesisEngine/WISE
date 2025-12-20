@@ -42,7 +42,7 @@ services:
       - type: bind
         source: ./frontend/html/media
         target: /workspace/media
-    command: uv run ./main.py
+    command: python main.py
     restart: unless-stopped
     depends_on:
       - Database
