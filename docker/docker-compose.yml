@@ -35,7 +35,7 @@ services:
       - type: bind
         source: ./backend/logs
         target: /workspace/logs
-    command: uv run ./main.py
+    command: python main.py
     restart: unless-stopped
     depends_on:
       - Database
