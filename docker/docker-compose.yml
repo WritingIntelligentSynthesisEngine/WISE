@@ -34,7 +34,7 @@ services:
     volumes:
       - type: bind
         source: ./backend/logs
-        target: /workspace/logs
+        target: /app/logs
     command: python main.py
     restart: unless-stopped
     depends_on:
