@@ -29,7 +29,7 @@ router: Router = Router(tags=["账户"])
 
 
 @router.post(
-    "/accounts/",
+    "/accounts",
     summary="注册账户",
     response={201: OutSchema[AccountOutSchema]},
 )
@@ -56,7 +56,7 @@ def register(
 
 
 @router.post(
-    "/account-verifications/",
+    "/account-verifications",
     summary="请求验证账户",
     response={201: OutSchema[str]},
 )
@@ -107,7 +107,7 @@ def account_verify_confirm(
 
 
 @router.post(
-    "/sessions/",
+    "/sessions",
     summary="登录账户",
     response={201: OutSchema[JwtOutSchema]},
 )
@@ -129,7 +129,7 @@ def login(
 
 
 @router.post(
-    "/password-resets/",
+    "/password-resets",
     summary="请求重置密码",
     response={201: OutSchema[str]},
 )

@@ -29,7 +29,7 @@ router: Router = Router(tags=["书籍与文章"])
 
 
 @router.post(
-    "/books/",
+    "/books",
     summary="创建书籍",
     auth=OptionalAuth(),
     response={201: OutSchema[BookOutSchema]},
@@ -52,7 +52,7 @@ def create_book(
 
 
 @router.delete(
-    "/books/{book_id}/",
+    "/books/{book_id}",
     summary="删除书籍",
     auth=OptionalAuth(),
     response={204: OutSchema[None], 403: OutSchema[None], 404: OutSchema[None]},
@@ -75,7 +75,7 @@ def delete_book(
 
 
 @router.patch(
-    "/books/{book_id}/",
+    "/books/{book_id}",
     summary="更新书籍",
     auth=OptionalAuth(),
     response={200: OutSchema[BookOutSchema], 403: OutSchema[None], 404: OutSchema[None]},
@@ -103,7 +103,7 @@ def update_book(
 
 
 @router.patch(
-    "/books/{book_id}/cover/",
+    "/books/{book_id}/cover",
     summary="更新封面图片",
     auth=OptionalAuth(),
     response={200: OutSchema[BookOutSchema], 403: OutSchema[None], 404: OutSchema[None]},
@@ -133,7 +133,7 @@ def upload_cover_image(
 
 
 @router.get(
-    "/books/",
+    "/books",
     summary="获取书籍列表",
     auth=OptionalAuth(),
     response={200: OutSchema[List[BookOutSchema]]},
@@ -169,7 +169,7 @@ def get_books(
 
 
 @router.get(
-    "/books/{book_id}/",
+    "/books/{book_id}",
     summary="获取书籍",
     auth=OptionalAuth(),
     response={200: OutSchema[BookOutSchema], 403: OutSchema[None], 404: OutSchema[None]},
@@ -192,7 +192,7 @@ def get_book(
 
 
 @router.post(
-    "/books/{book_id}/chapters/",
+    "/books/{book_id}/chapters",
     summary="创建章节",
     auth=OptionalAuth(),
     response={201: OutSchema[ChapterOutSchema], 403: OutSchema[None], 404: OutSchema[None]},
@@ -218,7 +218,7 @@ def create_chapter(
 
 
 @router.patch(
-    "/books/{book_id}/chapters/{chapter_number}/",
+    "/books/{book_id}/chapters/{chapter_number}",
     summary="更新章节",
     auth=OptionalAuth(),
     response={200: OutSchema[ChapterOutSchema], 403: OutSchema[None], 404: OutSchema[None]},
@@ -250,7 +250,7 @@ def update_chapter(
 
 
 @router.delete(
-    "/books/{book_id}/chapters/{chapter_number}/",
+    "/books/{book_id}/chapters/{chapter_number}",
     summary="删除章节",
     auth=OptionalAuth(),
     response={204: OutSchema[None], 403: OutSchema[None], 404: OutSchema[None]},
@@ -281,7 +281,7 @@ def delete_chapter(
 
 
 @router.get(
-    "/books/{book_id}/chapters/",
+    "/books/{book_id}/chapters",
     summary="获取章节列表",
     auth=OptionalAuth(),
     response={200: OutSchema[List[ChapterOutSchema]], 403: OutSchema[None], 404: OutSchema[None]},
@@ -313,7 +313,7 @@ def get_chapters(
 
 
 @router.get(
-    "/books/{book_id}/chapters/{chapter_number}/",
+    "/books/{book_id}/chapters/{chapter_number}",
     summary="获取章节",
     auth=OptionalAuth(),
     response={200: OutSchema[ChapterOutSchema], 403: OutSchema[None], 404: OutSchema[None]},
@@ -324,6 +324,7 @@ def get_chapter(
     chapter_number: int,
 ) -> Tuple[Literal[200], OutSchema[ChapterOutSchema]]:
     """获取特定章节"""
+
     # 获取书籍
     try:
         book: Book = BookService.get_book(book_id)
