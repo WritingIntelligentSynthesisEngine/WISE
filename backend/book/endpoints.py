@@ -186,7 +186,7 @@ def get_book(
     except Book.DoesNotExist:
         raise Error(404, "book_id", "书籍不存在")
         # 检查用户是否有权限查看书籍
-    if book.status == "draft" and not can_view(request.user, book):
+    if not can_view(request.user, book):
         raise Error(403, "permission", "没有查看权限")
     return 200, OutSchema(data=BookOutSchema.model_validate(book))
 

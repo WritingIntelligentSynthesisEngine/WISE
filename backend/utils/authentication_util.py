@@ -6,7 +6,7 @@ from ninja_jwt.authentication import JWTAuth
 from django.contrib.auth.models import AnonymousUser
 
 
-anonymou_suser: AnonymousUser = AnonymousUser()
+anonymous_user: AnonymousUser = AnonymousUser()
 
 
 class OptionalAuth(JWTAuth):
@@ -15,6 +15,7 @@ class OptionalAuth(JWTAuth):
     def __call__(self, request: HttpRequest) -> Any:
         auth_result = super().__call__(request)
         if auth_result is None:
-            # 如果没有认证信息, 返回匿名用户
-            return anonymou_suser
+            # 如果没有认证信息, 显式设置 request.user 并返回匿名用户
+            request.user = anonymous_user
+            return anonymous_user
         return auth_result

@@ -12,7 +12,6 @@ from django.template.loader import render_to_string
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
-from utils.exception_util import Error
 from account.schemas import (
     RegisterInSchema,
     AccountOutSchema,

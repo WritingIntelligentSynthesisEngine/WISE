@@ -50,6 +50,8 @@ def can_update(user: AbstractUser | AnonymousUser, book: Book) -> bool:
 def can_view(user: AbstractUser | AnonymousUser, book: Book) -> bool:
     """未发布时, 未激活用户和读者没有查阅权限"""
 
+    if book.status != "draft":
+        return True
     if is_active(user):
         return False
     return is_admin(user) or is_author(user, book) or is_co_author(user, book) or is_editor(user, book)
