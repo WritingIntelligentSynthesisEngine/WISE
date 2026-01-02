@@ -42,6 +42,7 @@ class ChapterCreateInSchema(Schema):
 
     chapter_number: int
     title: str
+    outline: Optional[str] = None
     content: List[Dict[str, Any]] = []
 
 
@@ -50,6 +51,7 @@ class ChapterUpdateInSchema(Schema):
 
     chapter_number: Optional[int] = None
     title: Optional[str] = None
+    outline: Optional[str] = None
     content: Optional[List[Dict[str, Any]]] = None
     status: Optional[str] = None
 

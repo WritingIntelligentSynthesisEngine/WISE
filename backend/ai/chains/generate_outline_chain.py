@@ -1,5 +1,5 @@
 # ai/chains/generate_outline_chain.py
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Generator
 
 
 from langchain_core.output_parsers import StrOutputParser
@@ -18,8 +18,8 @@ def generate_outline(
     settings: str,
     current_number: int,
     previous_outlines: List[str],
-) -> str:
-    """生成小说大纲"""
+) -> Generator[str, None, None]:
+    """生成小说大纲(流式)"""
 
     # 构建历史消息
     context_size: int = len(previous_outlines)
@@ -41,12 +41,6 @@ def generate_outline(
     input_data: Dict[str, Any] = {"history": history}
     # 构建 Chain
     chain: RunnableSerializable[Dict[Any, Any], str] = prompt | llm | parser
-    result: str = ""
-    # 调用 Chain
+    # 调用 Chain 并流式返回每个 chunk
     for chunk in chain.stream(input_data):
-        from utils.debug_util import debug
-
-        debug(chunk, end="", flush=True)
-        result += chunk
-    # 返回清理后的结果
-    return result.strip()
+        yield chunk

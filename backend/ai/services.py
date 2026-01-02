@@ -1,10 +1,10 @@
 # ai/services.py
-from typing import Any, List
+from typing import Any, List, Generator
 
-from book.models import Book
-from book.services import BookService, ChapterService
-from chains.generate_outline_chain import generate_outline
-from chains.generate_chapter_chain import generate_chapter
+from book.models import Book, Chapter
+from book.services import ChapterService
+from ai.chains.generate_outline_chain import generate_outline
+from ai.chains.generate_chapter_chain import generate_chapter
 
 
 class AiService:
@@ -19,16 +19,16 @@ class BookAiService:
     @staticmethod
     def generate_outline(
         llm: Any,
-        book_id: int,
-        current_number: int,
+        book: Book,
+        chapter: Chapter,
         context_size: int,
-    ) -> str:
-        """生成大纲"""
+    ) -> Generator[str, None, None]:
+        """生成大纲(流式)"""
 
-        # 获取书籍
-        book: Book = BookService.get_book(book_id)
         # 获取设定
         book_settings: str = book.settings
+        # 获取当前章节数
+        current_number: int = chapter.chapter_number
         # 获取历史大纲
         previous_outlines: List[str] = []
         if current_number != 1:
@@ -36,23 +36,26 @@ class BookAiService:
             end_chapter: int = current_number
             for chapter in ChapterService.get_chapters_by_range(book, start_chapter, end_chapter):
                 previous_outlines.append(chapter.outline)
-        return generate_outline(llm, book_settings, current_number, previous_outlines)
+        # 调用流式生成函数并逐个返回 chunk
+        for chunk in generate_outline(llm, book_settings, current_number, previous_outlines):
+            yield chunk
 
     @staticmethod
     def generate_chapter(
         llm: Any,
-        book_id: int,
-        current_number: int,
+        book: Book,
+        chapter: Chapter,
         context_size: int,
     ) -> str:
         """生成章节"""
 
-        # 获取书籍
-        book: Book = BookService.get_book(book_id)
         # 获取设定
         book_settings: str = book.settings
+        # 获取当前章节数
+        current_number: int = chapter.chapter_number
         # 获取当前大纲
-        outline: str = ChapterService.get_chapter(book_id, current_number).outline
+        outline: str = chapter.outline
+
         # 获取历史大纲和正文
         previous_outlines: List[str] = []
         previous_chapters: List[str] = []

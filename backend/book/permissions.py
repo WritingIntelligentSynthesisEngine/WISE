@@ -52,6 +52,6 @@ def can_view(user: AbstractUser | AnonymousUser, book: Book) -> bool:
 
     if book.status != "draft":
         return True
-    if is_active(user):
+    if not is_active(user):
         return False
     return is_admin(user) or is_author(user, book) or is_co_author(user, book) or is_editor(user, book)

@@ -45,9 +45,6 @@ def generate_chapter(
     result: str = ""
     # 调用 Chain
     for chunk in chain.stream(input_data):
-        from utils.debug_util import debug
-
-        debug(chunk, end="", flush=True)
         result += chunk
     # 返回清理后的结果
     return result.strip()

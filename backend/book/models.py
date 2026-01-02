@@ -60,11 +60,13 @@ class Book(Model):
     description: TextField = TextField(
         verbose_name="简介",
         default="",
+        blank=True,
     )
     # 设定
     settings: TextField = TextField(
         verbose_name="设定",
         default="",
+        blank=True,
     )
     # 封面图片路径
     cover_image_path: CharField = CharField(
@@ -105,7 +107,7 @@ class Book(Model):
     )
 
     @property
-    def authors(self) -> UserManager[User]: # pyright: ignore[reportInvalidTypeForm]
+    def authors(self) -> UserManager[User]:  # pyright: ignore[reportInvalidTypeForm]
         """获取书籍的所有创作者(主创和共创)"""
         return User.objects.filter(
             userbookrelation__book=self,
@@ -231,6 +233,7 @@ class Chapter(Model):
     outline: TextField = TextField(
         verbose_name="大纲",
         default="",
+        blank=True,
     )
     # 内容(JSON格式)
     content: JSONField = JSONField(

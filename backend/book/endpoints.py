@@ -238,7 +238,7 @@ def update_chapter(
         raise Error(404, "book_id", "书籍不存在")
     # 获取章节
     try:
-        chapter: Chapter = ChapterService.get_chapter(book_id, chapter_number)
+        chapter: Chapter = ChapterService.get_chapter(book, chapter_number)
     except Chapter.DoesNotExist:
         raise Error(404, "chapter_number", "章节不存在")
     # 检查权限
@@ -269,7 +269,7 @@ def delete_chapter(
         raise Error(404, "book_id", "书籍不存在")
     # 获取章节
     try:
-        chapter: Chapter = ChapterService.get_chapter(book_id, chapter_number)
+        chapter: Chapter = ChapterService.get_chapter(book, chapter_number)
     except Chapter.DoesNotExist:
         raise Error(404, "chapter_number", "章节不存在")
     # 检查权限
@@ -335,7 +335,7 @@ def get_chapter(
         raise Error(403, "permission", "没有查看权限")
     # 获取章节
     try:
-        chapter: Chapter = ChapterService.get_chapter(book_id, chapter_number)
+        chapter: Chapter = ChapterService.get_chapter(book, chapter_number)
     except Chapter.DoesNotExist:
         raise Error(404, "chapter_number", "章节不存在")
     return 200, OutSchema(data=ChapterOutSchema.model_validate(chapter))

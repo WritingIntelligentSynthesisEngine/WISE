@@ -183,12 +183,12 @@ class ChapterService:
 
     @staticmethod
     def get_chapter(
-        book_id: int,
+        book: Book,
         chapter_number: int,
     ) -> Chapter:
         """获取特定章节"""
 
-        return Chapter.objects.get(book_id=book_id, chapter_number=chapter_number)
+        return Chapter.objects.get(book_id=book.id, chapter_number=chapter_number)
 
     @staticmethod
     def get_chapters(
