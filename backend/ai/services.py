@@ -1,5 +1,5 @@
 # ai/services.py
-from typing import Any, List, Generator
+from typing import Any, List, AsyncGenerator
 
 from book.models import Book, Chapter
 from book.services import ChapterService
@@ -17,12 +17,12 @@ class BookAiService:
     """书籍 AI 服务类"""
 
     @staticmethod
-    def generate_outline(
+    async def generate_outline(
         llm: Any,
         book: Book,
         chapter: Chapter,
         context_size: int,
-    ) -> Generator[str, None, None]:
+    ) -> AsyncGenerator[str, None]:
         """生成大纲(流式)"""
 
         # 获取设定
@@ -37,7 +37,7 @@ class BookAiService:
             for chapter in ChapterService.get_chapters_by_range(book, start_chapter, end_chapter):
                 previous_outlines.append(chapter.outline)
         # 调用流式生成函数并逐个返回 chunk
-        for chunk in generate_outline(llm, book_settings, current_number, previous_outlines):
+        async for chunk in generate_outline(llm, book_settings, current_number, previous_outlines):
             yield chunk
 
     @staticmethod

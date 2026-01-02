@@ -124,6 +124,14 @@ class BookService:
 
         return Book.objects.get(id=book_id)
 
+    @staticmethod
+    async def get_book_async(
+        book_id: int,
+    ) -> Book:
+        """获取特定书籍(异步)"""
+
+        return await Book.objects.aget(id=book_id)
+
 
 class ChapterService:
     """章节服务类"""
@@ -182,6 +190,14 @@ class ChapterService:
         return chapter
 
     @staticmethod
+    def get_chapters(
+        book: Book,
+    ) -> BaseManager[Chapter]:
+        """获取所有章节"""
+
+        return Chapter.objects.filter(book=book)
+
+    @staticmethod
     def get_chapter(
         book: Book,
         chapter_number: int,
@@ -191,12 +207,13 @@ class ChapterService:
         return Chapter.objects.get(book_id=book.id, chapter_number=chapter_number)
 
     @staticmethod
-    def get_chapters(
+    async def get_chapter_async(
         book: Book,
-    ) -> BaseManager[Chapter]:
-        """获取所有章节"""
+        chapter_number: int,
+    ) -> Chapter:
+        """获取特定章节(异步)"""
 
-        return Chapter.objects.filter(book=book)
+        return await Chapter.objects.aget(book_id=book.id, chapter_number=chapter_number)
 
     @staticmethod
     def get_chapters_by_range(

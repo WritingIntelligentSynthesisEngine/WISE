@@ -1,6 +1,6 @@
 # ai/endpoints.py
 import json
-from typing import Any, Generator
+from typing import Any, AsyncGenerator
 
 from ninja import Router
 from pydantic import SecretStr
@@ -30,7 +30,7 @@ router: Router = Router(tags=["AI"])
     auth=OptionalAuth(),
     response={201: Any, 400: OutSchema[None], 403: OutSchema[None], 404: OutSchema[None], 500: OutSchema[None]},
 )
-def generate_outline(
+async def generate_outline(
     request: HttpRequest,
     data: GenerateOutlineInSchema,
 ) -> StreamingHttpResponse:
@@ -40,7 +40,7 @@ def generate_outline(
     user: AbstractUser | AnonymousUser = request.user
     # 获取书籍
     try:
-        book: Book = BookService.get_book(data.book_id)
+        book: Book = await BookService.get_book_async(data.book_id)
     except Book.DoesNotExist:
         raise Error(404, "book_id", "书籍不存在")
     # 检查权限
@@ -48,7 +48,7 @@ def generate_outline(
         raise Error(403, "permission", "没有查看权限")
     # 获取章节
     try:
-        chapter: Chapter = ChapterService.get_chapter(book, data.chapter_number)
+        chapter: Chapter = await ChapterService.get_chapter_async(book, data.chapter_number)
     except Chapter.DoesNotExist:
         raise Error(404, "chapter_number", "章节不存在")
     # 获取用户的 API Key
@@ -56,26 +56,27 @@ def generate_outline(
     if api_key is None:
         raise Error(400, "api_key", "未设置 API Key")
 
-    def event_stream() -> Generator[str, None, None]:
+    async def event_stream() -> AsyncGenerator[str, None]:
         """生成 SSE 流"""
+
         try:
-            llm: ChatDeepSeek = construct_llm(SecretStr(secret_value=api_key))
+            llm: ChatDeepSeek = await construct_llm(SecretStr(secret_value=api_key))
             # 获取流式生成器
-            outline_chunks: Generator[str, None, None] = BookAiService.generate_outline(
+            outline_chunks: AsyncGenerator[str, None] = BookAiService.generate_outline(
                 llm=llm,
                 book=book,
                 chapter=chapter,
                 context_size=data.context_size,
             )
             # 发送每个 chunk 作为 SSE 事件
-            for chunk in outline_chunks:
+            async for chunk in outline_chunks:
                 if chunk:
                     # 正确格式化 SSE 数据
                     # 将 chunk 编码为 JSON 字符串以确保正确转义
                     data_json = json.dumps({"content": chunk}, ensure_ascii=False)
                     yield f"data: {data_json}\n\n"
             # 发送完成事件
-            yield 'event: complete\ndata: {"status": "done"}\n\n'
+            yield "data: [DONE]\n\n"
         except Exception as e:
             # 发送错误事件
             error_data = json.dumps({"error": str(e)}, ensure_ascii=False)

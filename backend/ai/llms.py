@@ -3,7 +3,7 @@ from pydantic import SecretStr
 from langchain_deepseek import ChatDeepSeek
 
 
-def construct_llm(
+async def construct_llm(
     api_key: SecretStr,
 ) -> ChatDeepSeek:
 
