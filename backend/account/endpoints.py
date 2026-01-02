@@ -22,6 +22,7 @@ from account.schemas import (
     LoginInSchema,
     JwtOutSchema,
     PasswordResetConfirmInSchema,
+    AccountUpdateInSchema,
 )
 
 
@@ -128,6 +129,28 @@ def get_accounts(
     return 200, OutSchema(data=[AccountOutSchema.model_validate(account) for account in queryset[start:end]])
 
 
+@router.patch(
+    "/accounts/me",
+    summary="更新当前账户信息",
+    auth=OptionalAuth(),
+    response={200: OutSchema[SensitiveAccountOutSchema], 400: OutSchema[None], 403: OutSchema[None]},
+)
+def update_my_account(
+    request: HttpRequest,
+    data: AccountUpdateInSchema,
+) -> Tuple[Literal[200], OutSchema[SensitiveAccountOutSchema]]:
+    """更新当前账户信息"""
+
+    try:
+        # 获取当前账户
+        account: AbstractUser = AccountService.get_account(request.user.username)
+        # 更新账户信息
+        account: AbstractUser = AccountService.update_account(account, data)
+    except:
+        raise Error(404, "account", "未登录")
+    return 200, OutSchema(data=SensitiveAccountOutSchema.model_validate(account))
+
+
 @router.get(
     "/accounts/other/{username}",
     summary="获取账户信息",
@@ -160,7 +183,7 @@ def get_my_account(
     try:
         account: AbstractUser = AccountService.get_account(request.user.username)
     except:
-        raise Error(404, "username", "用户不存在")
+        raise Error(404, "account", "未登录")
     return 200, OutSchema(data=SensitiveAccountOutSchema.model_validate(account))
 
 

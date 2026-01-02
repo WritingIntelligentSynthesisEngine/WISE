@@ -49,6 +49,13 @@ class RegisterInSchema(Schema, UsernameValidatorMixin, PasswordValidatorMixin):
     password_confirm: str
 
 
+class AccountUpdateInSchema(Schema, UsernameValidatorMixin):
+    """更新账户信息时输入"""
+
+    username: Optional[str] = None
+    api_key: Optional[str] = None
+
+
 class AccountOutSchema(Schema):
     """账户信息输出"""
 

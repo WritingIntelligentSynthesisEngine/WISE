@@ -10,12 +10,14 @@ from django.contrib.auth import get_user_model
 from django.db.models.manager import BaseManager
 from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
+from utils.exception_util import Error
 from account.schemas import (
     RegisterInSchema,
     EmailRequestInSchema,
+    AccountUpdateInSchema,
     JwtOutSchema,
     PasswordResetConfirmInSchema,
 )
@@ -105,6 +107,24 @@ class AccountService:
             return user
         else:
             raise
+
+    @staticmethod
+    @transaction.atomic
+    def update_account(
+        user: AbstractUser,
+        data: AccountUpdateInSchema,
+    ) -> AbstractUser:
+        """更新账户信息"""
+
+        # 检查用户名唯一性
+        if data.username is not None:
+            if User.objects.filter(username=data.username).exclude(pk=user.pk).exists():
+                raise Error(400, "username", "用户名已被占用")
+            user.username = data.username
+        # 更新 API Key
+        setattr(user, "api_key", data.api_key)
+        user.save()
+        return user
 
     @staticmethod
     def get_account(
