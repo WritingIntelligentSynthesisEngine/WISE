@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+from datetime import timedelta
 from typing import Any, List, Dict, Tuple
 
 from utils import log_util
@@ -158,6 +159,11 @@ DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
 # 用户模型
 AUTH_USER_MODEL = "account.CustomUser"
+
+# JWT 配置
+NINJA_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1) if DEBUG else timedelta(minutes=5),  # 调试模式下延长 JWT 失效时间
+}
 
 # simpleui 配置
 SIMPLEUI_HOME_INFO: bool = False
