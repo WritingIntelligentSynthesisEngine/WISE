@@ -2,9 +2,14 @@
 from typing import Any, Self, Literal, List, Tuple
 
 from django.utils import timezone
-from django.contrib.auth.models import User, UserManager
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import UserManager
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Model, AutoField, IntegerField, CharField, TextField, DateTimeField, JSONField, ForeignKey, Avg, CASCADE
+
+
+User: type[AbstractUser] = get_user_model()
 
 
 class Category(Model):
@@ -100,9 +105,12 @@ class Book(Model):
     )
 
     @property
-    def authors(self) -> UserManager[User]:
+    def authors(self) -> UserManager[User]: # pyright: ignore[reportInvalidTypeForm]
         """获取书籍的所有创作者(主创和共创)"""
-        return User.objects.filter(userbookrelation__book=self, userbookrelation__creative_role__in=["author", "co_author"]).distinct()
+        return User.objects.filter(
+            userbookrelation__book=self,
+            userbookrelation__creative_role__in=["author", "co_author"],
+        ).distinct()
 
     @property
     def main_author(self) -> Any | None:

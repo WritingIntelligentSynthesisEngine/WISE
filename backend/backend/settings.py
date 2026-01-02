@@ -156,6 +156,9 @@ MEDIA_ROOT: str = os.path.join(BASE_DIR, "media")
 
 DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
+# 用户模型
+AUTH_USER_MODEL = "account.CustomUser"
+
 # simpleui 配置
 SIMPLEUI_HOME_INFO: bool = False
 SIMPLEUI_DEFAULT_THEME: str = "element.css"

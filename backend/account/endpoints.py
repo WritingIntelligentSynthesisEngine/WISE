@@ -22,7 +22,6 @@ from account.schemas import (
 )
 
 
-# 动态获取当前项目中配置的用户模型类
 User: type[AbstractUser] = get_user_model()
 
 router: Router = Router(tags=["账户"])
