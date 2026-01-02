@@ -29,6 +29,7 @@ class BookService:
             category=category,
             title=data.title,
             description=data.description,
+            settings=data.settings,
             status="draft",
             attributes=data.attributes,
         )
@@ -85,6 +86,8 @@ class BookService:
             book.title = data.title
         if data.description is not None:
             book.description = data.description
+        if data.settings is not None:
+            book.settings = data.settings
         if data.attributes is not None:
             book.attributes = data.attributes
         if category is not None:
@@ -152,6 +155,7 @@ class ChapterService:
             book=book,
             chapter_number=data.chapter_number,
             title=data.title,
+            outline=data.outline,
             content=data.content,
         )
         return chapter
@@ -182,10 +186,10 @@ class ChapterService:
             chapter.chapter_number = data.chapter_number
         if data.title is not None:
             chapter.title = data.title
+        if data.outline is not None:
+            chapter.outline = data.outline
         if data.content is not None:
             chapter.content = data.content
-        if data.status is not None:
-            chapter.status = data.status
         chapter.save()
         return chapter
 

@@ -11,6 +11,7 @@ class BookCreateInSchema(Schema):
     category_id: Optional[int] = None
     title: str
     description: str = "无"
+    settings: Optional[str] = None
     attributes: Dict[str, Any] = {}
 
 
@@ -20,6 +21,7 @@ class BookUpdateInSchema(Schema):
     category_id: Optional[int] = None
     title: Optional[str] = None
     description: Optional[str] = None
+    settings: Optional[str] = None
     attributes: Optional[Dict[str, Any]] = None
 
 
@@ -30,6 +32,7 @@ class BookOutSchema(Schema):
     category_id: Optional[int] = None
     title: str
     description: str
+    settings: Optional[str] = None
     cover_image_path: str
     create_time: datetime
     update_time: datetime
@@ -53,7 +56,6 @@ class ChapterUpdateInSchema(Schema):
     title: Optional[str] = None
     outline: Optional[str] = None
     content: Optional[List[Dict[str, Any]]] = None
-    status: Optional[str] = None
 
 
 class ChapterOutSchema(Schema):
@@ -63,6 +65,7 @@ class ChapterOutSchema(Schema):
     book_id: int
     chapter_number: int
     title: str
+    outline: Optional[str] = None
     content: List[Dict[str, Any]]
     create_time: datetime
     update_time: datetime
