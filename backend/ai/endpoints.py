@@ -1,10 +1,8 @@
 # ai/endpoints.py
-import json
 from typing import Any, AsyncGenerator
 
 from ninja import Router
 from pydantic import SecretStr
-from django.conf import settings
 from django.http import HttpRequest, StreamingHttpResponse
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 
@@ -18,6 +16,7 @@ from book.permissions import can_view
 from utils.exception_util import Error
 from ai.schemas import GenerateOutlineInSchema
 from utils.authentication_util import OptionalAuth
+from utils.sse_util import create_sse_response
 from book.services import BookService, ChapterService
 
 
@@ -56,41 +55,17 @@ async def generate_outline(
     if api_key is None:
         raise Error(400, "api_key", "未设置 API Key")
 
-    async def event_stream() -> AsyncGenerator[str, None]:
-        """生成 SSE 流"""
+    async def outline_generator() -> AsyncGenerator[str, None]:
+        """生成大纲内容的异步生成器"""
 
-        try:
-            llm: ChatDeepSeek = await construct_llm(SecretStr(secret_value=api_key))
-            # 获取流式生成器
-            outline_chunks: AsyncGenerator[str, None] = BookAiService.generate_outline(
-                llm=llm,
-                book=book,
-                chapter=chapter,
-                context_size=data.context_size,
-            )
-            # 发送每个 chunk 作为 SSE 事件
-            async for chunk in outline_chunks:
-                if chunk:
-                    # 正确格式化 SSE 数据
-                    # 将 chunk 编码为 JSON 字符串以确保正确转义
-                    data_json = json.dumps({"content": chunk}, ensure_ascii=False)
-                    yield f"data: {data_json}\n\n"
-            # 发送完成事件
-            yield "data: [DONE]\n\n"
-        except Exception as e:
-            # 发送错误事件
-            error_data = json.dumps({"error": str(e)}, ensure_ascii=False)
-            yield f"event: error\ndata: {error_data}\n\n"
+        llm: ChatDeepSeek = await construct_llm(SecretStr(secret_value=api_key))
+        outline_chunks: AsyncGenerator[str, None] = BookAiService.generate_outline(
+            llm=llm,
+            book=book,
+            chapter=chapter,
+            context_size=data.context_size,
+        )
+        async for chunk in outline_chunks:
+            yield chunk
 
-    headers = {
-        "Cache-Control": "no-cache",
-        "X-Accel-Buffering": "no",  # 禁用 Nginx 缓冲
-    }
-    if not settings.DEBUG:
-        headers["Connection"] = "keep-alive"
-
-    return StreamingHttpResponse(
-        event_stream(),  # pyright: ignore[reportArgumentType]
-        content_type="text/event-stream",
-        headers=headers,
-    )
+    return create_sse_response(outline_generator())
