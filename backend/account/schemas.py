@@ -1,6 +1,7 @@
 # account/schemas.py
 from datetime import datetime
-from typing import Type, Self
+from decimal import Decimal
+from typing import Type, Self, Optional
 from pydantic import ValidationInfo, EmailStr, field_validator
 
 from ninja import Schema
@@ -51,10 +52,21 @@ class RegisterInSchema(Schema, UsernameValidatorMixin, PasswordValidatorMixin):
 class AccountOutSchema(Schema):
     """账户信息输出"""
 
+    last_login: Optional[datetime]
+    is_superuser: bool
     username: str
     email: str
+    is_staff: bool
     is_active: bool
     date_joined: datetime
+    profile_image_path: str
+
+
+class SensitiveAccountOutSchema(AccountOutSchema):
+    """敏感账户信息输出"""
+
+    balance: Decimal
+    api_key: str
 
 
 class LoginInSchema(Schema):

@@ -1,20 +1,23 @@
 # account/endpoints.py
-from typing import Tuple, Literal
+from typing import List, Tuple, Literal
 
 from ninja import Router
 from django.http import HttpRequest
 from django.utils.encoding import force_str
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
+from django.db.models.manager import BaseManager
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.models import AbstractUser
 
 from core.schemas import OutSchema
 from utils.exception_util import Error
 from account.services import AccountService
+from utils.authentication_util import OptionalAuth
 from account.schemas import (
     RegisterInSchema,
     AccountOutSchema,
+    SensitiveAccountOutSchema,
     EmailRequestInSchema,
     LoginInSchema,
     JwtOutSchema,
@@ -50,8 +53,8 @@ def register(
         # 全新注册
         if User.objects.filter(username=data.username).exists():
             raise Error(400, "username", "用户名已存在")
-    account: AccountOutSchema = AccountService.register(user, data)
-    return 201, OutSchema(data=account)
+    account: AbstractUser = AccountService.register(user, data)
+    return 201, OutSchema(data=AccountOutSchema.model_validate(account))
 
 
 @router.post(
@@ -99,10 +102,66 @@ def account_verify_confirm(
         # 检查用户是否存在
         if user is None:
             raise Error(403, "account", "账户不存在")
-        account: AccountOutSchema = AccountService.account_verify_confirm(user, token)
+        account: AbstractUser = AccountService.account_verify_confirm(user, token)
     except:
         raise Error(400, "token", "链接无效或已过期")
-    return 200, OutSchema(data=account)
+    return 200, OutSchema(data=AccountOutSchema.model_validate(account))
+
+
+@router.get(
+    "/accounts",
+    summary="获取账户信息列表",
+    response={200: OutSchema[List[AccountOutSchema]]},
+)
+def get_accounts(
+    request: HttpRequest,
+    page: int = 1,
+    page_size: int = 20,
+) -> Tuple[Literal[200], OutSchema[List[AccountOutSchema]]]:
+    """获取账户信息列表, 支持分页"""
+
+    # 获取所有账户
+    queryset: BaseManager[AbstractUser] = AccountService.get_accounts()
+    # 分页
+    start: int = (page - 1) * page_size
+    end: int = start + page_size
+    return 200, OutSchema(data=[AccountOutSchema.model_validate(account) for account in queryset[start:end]])
+
+
+@router.get(
+    "/accounts/other/{username}",
+    summary="获取账户信息",
+    response={200: OutSchema[AccountOutSchema], 404: OutSchema[None]},
+)
+def get_account(
+    request: HttpRequest,
+    username: str,
+) -> Tuple[Literal[200], OutSchema[AccountOutSchema]]:
+    """获取特定账户信息, 不会输出敏感信息"""
+
+    try:
+        account: AbstractUser = AccountService.get_account(username)
+    except:
+        raise Error(404, "username", "用户不存在")
+    return 200, OutSchema(data=AccountOutSchema.model_validate(account))
+
+
+@router.get(
+    "/accounts/me",
+    summary="获取当前账户信息",
+    auth=OptionalAuth(),
+    response={200: OutSchema[SensitiveAccountOutSchema], 404: OutSchema[None]},
+)
+def get_my_account(
+    request: HttpRequest,
+) -> Tuple[Literal[200], OutSchema[SensitiveAccountOutSchema]]:
+    """获取当前账户信息, 会输出敏感信息"""
+
+    try:
+        account: AbstractUser = AccountService.get_account(request.user.username)
+    except:
+        raise Error(404, "username", "用户不存在")
+    return 200, OutSchema(data=SensitiveAccountOutSchema.model_validate(account))
 
 
 @router.post(

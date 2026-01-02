@@ -7,6 +7,7 @@ from django.core.mail import EmailMessage
 from ninja_jwt.tokens import RefreshToken
 from django.utils.encoding import force_bytes
 from django.contrib.auth import get_user_model
+from django.db.models.manager import BaseManager
 from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
 from django.contrib.auth.models import AbstractUser
@@ -14,7 +15,6 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 from account.schemas import (
     RegisterInSchema,
-    AccountOutSchema,
     EmailRequestInSchema,
     JwtOutSchema,
     PasswordResetConfirmInSchema,
@@ -46,7 +46,7 @@ class AccountService:
     def register(
         user: AbstractUser | None,
         data: RegisterInSchema,
-    ) -> AccountOutSchema:
+    ) -> AbstractUser:
         """注册账户, 如果用户已存在但未激活, 则更新用户信息"""
 
         if user is None:
@@ -62,12 +62,7 @@ class AccountService:
             user.username = data.username
             user.set_password(data.password)
             user.save()
-        return AccountOutSchema(
-            username=user.username,
-            email=user.email,
-            is_active=user.is_active,
-            date_joined=user.date_joined,
-        )
+        return user
 
     @staticmethod
     def account_verify_request(
@@ -100,21 +95,30 @@ class AccountService:
     def account_verify_confirm(
         user: AbstractUser,
         token: str,
-    ) -> AccountOutSchema:
+    ) -> AbstractUser:
         """验证账户"""
 
         # 验证令牌有效性
         if user is not None and account_activation_token.check_token(user, token):
             user.is_active = True
             user.save()
-            return AccountOutSchema(
-                username=user.username,
-                email=user.email,
-                is_active=user.is_active,
-                date_joined=user.date_joined,
-            )
+            return user
         else:
             raise
+
+    @staticmethod
+    def get_account(
+        username: str,
+    ) -> AbstractUser:
+        """获取账户信息"""
+
+        return User.objects.get(username=username)
+
+    @staticmethod
+    def get_accounts() -> BaseManager[AbstractUser]:
+        """获取所有账户"""
+
+        return User.objects.all()
 
     @staticmethod
     def login(
