@@ -13,6 +13,7 @@ from core.schemas import OutSchema
 from ai.services import BookAiService
 from book.models import Book, Chapter
 from book.permissions import can_view
+from asgiref.sync import sync_to_async
 from utils.exception_util import Error
 from ai.schemas import GenerateOutlineInSchema
 from utils.authentication_util import OptionalAuth
@@ -43,7 +44,7 @@ async def generate_outline(
     except Book.DoesNotExist:
         raise Error(404, "book_id", "书籍不存在")
     # 检查权限
-    if not can_view(request.user, book):
+    if not sync_to_async(can_view)(request.user, book):
         raise Error(403, "permission", "没有查看权限")
     # 获取章节
     try:
