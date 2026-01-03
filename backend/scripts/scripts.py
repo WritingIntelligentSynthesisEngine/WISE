@@ -86,16 +86,12 @@ def createsuperuser() -> None:
         User: type[AbstractUser] = get_user_model()
         # 检查是否已存在超级用户
         if not User.objects.filter(is_superuser=True).exists():
-            execute_from_command_line(
-                [
-                    "manage.py",
-                    "createsuperuser",
-                    "--username",
-                    f"{os.environ.get('DJANGO_SUPERUSER_USERNAME')}",
-                    "--email",
-                    f"{os.environ.get('DJANGO_SUPERUSER_EMAIL')}",
-                    "--noinput",
-                ]
+            User.objects.create_user(
+                is_active=True,
+                is_staff=True,
+                is_superuser=True,
+                username=f"{os.environ.get('BACKEND_SUPERUSER_USERNAME')}",
+                password=f"{os.environ.get('BACKEND_SUPERUSER_PASSWORD')}",
             )
             print("✅ 超级用户创建完成")
         else:

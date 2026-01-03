@@ -27,7 +27,7 @@ BASE_DIR: Path = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY: str = f"{os.environ.get('SECRET_KEY')}"
+SECRET_KEY: str = f"{os.environ.get('BACKEND_SECRET_KEY')}"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG: bool = os.environ.get("BACKEND_DEBUG") == "True"
@@ -36,7 +36,7 @@ ALLOWED_HOSTS: List[str] = ["*"]
 
 # 添加 CSRF 信任来源
 
-CSRF_TRUSTED_ORIGINS: List[str] = [domain.strip() for domain in os.environ.get("FRONTEND_DOMAIN", "").split(",") if domain.strip()]
+CSRF_TRUSTED_ORIGINS: List[str] = [domain.strip() for domain in os.environ.get("BACKEND_CSRF_TRUSTED_ORIGINS", "").split(",") if domain.strip()]
 
 # 添加 X-Forwarded 代理支持
 
